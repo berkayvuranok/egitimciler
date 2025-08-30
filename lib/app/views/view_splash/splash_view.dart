@@ -24,7 +24,7 @@ class _ViewSplashState extends State<ViewSplash>
   void initState() {
     super.initState();
 
-    // Dönen yazı
+    // Dönen yazı animasyonu
     _rotationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 10),
@@ -53,7 +53,9 @@ class _ViewSplashState extends State<ViewSplash>
       create: (_) => SplashViewModel()..add(SplashStarted()),
       child: BlocConsumer<SplashViewModel, SplashState>(
         listener: (context, state) {
-          if (state.navigateToHome) {
+          if (state.navigateToOnboarding) {
+            Navigator.of(context).pushReplacementNamed('/onboarding');
+          } else if (state.navigateToHome) {
             Navigator.of(context).pushReplacementNamed('/home');
           }
         },
@@ -143,4 +145,3 @@ class CircularTextPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
-
