@@ -1,9 +1,17 @@
+import 'package:egitimciler/app/router/app_router.dart';
+import 'package:egitimciler/app/views/view_onboarding/view_model/onboarding_view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:egitimciler/app/views/view_splash/splash_view.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    // Root seviyede OnboardingViewModel provider
+    BlocProvider(
+      create: (_) => OnboardingViewModel(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -18,17 +26,14 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         useMaterial3: true,
       ),
-      // Splash ekranını ilk rota olarak ayarlıyoruz
-      routes: {
-        '/': (context) => const ViewSplash(),
-        '/home': (context) => const HomeScreen(),
-      },
+      // Route yönetimi AppRouter üzerinden yapılacak
+      onGenerateRoute: AppRouter.generateRoute,
       initialRoute: '/',
     );
   }
 }
 
-// Ana ekran – splash sonrası yönlendirilecek
+// Ana ekran – Splash ve Onboarding sonrası yönlendirilecek
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
