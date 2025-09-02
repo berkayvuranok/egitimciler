@@ -15,8 +15,8 @@ dependencies:
   equatable: ^2.0.5
   google_fonts: ^6.2.1
   shared_preferences: ^2.1.1
-
-  
+  supabase_flutter: ^2.10.0
+  sign_in_with_apple: ^6.0.0  # Güncel sürüm, Android ve iOS uyumlu
 
 dev_dependencies:
   flutter_test:
