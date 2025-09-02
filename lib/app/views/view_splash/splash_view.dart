@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:math' as math;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'view_model/splash_view_model.dart';
 import 'view_model/splash_event.dart';
@@ -38,6 +39,23 @@ class _ViewSplashState extends State<ViewSplash>
 
     _pulseAnimation = Tween<double>(begin: 0.95, end: 1.05)
         .animate(CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut));
+
+    // Onboarding kontrolü ve yönlendirme
+    _navigateAfterSplash();
+  }
+
+  Future<void> _navigateAfterSplash() async {
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
+
+    // Splash ekran süresi
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (onboardingCompleted) {
+      Navigator.of(context).pushReplacementNamed('/home');
+    } else {
+      Navigator.of(context).pushReplacementNamed('/onboarding');
+    }
   }
 
   @override
@@ -53,11 +71,7 @@ class _ViewSplashState extends State<ViewSplash>
       create: (_) => SplashViewModel()..add(SplashStarted()),
       child: BlocConsumer<SplashViewModel, SplashState>(
         listener: (context, state) {
-          if (state.navigateToOnboarding) {
-            Navigator.of(context).pushReplacementNamed('/onboarding');
-          } else if (state.navigateToHome) {
-            Navigator.of(context).pushReplacementNamed('/home');
-          }
+          // İstersen burayı kullanmaya devam edebilirsin, ama yönlendirme zaten _navigateAfterSplash ile yapılıyor
         },
         builder: (context, state) {
           return Scaffold(

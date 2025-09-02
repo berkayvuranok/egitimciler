@@ -1,15 +1,15 @@
-import 'package:egitimciler/main.dart';
+import 'package:egitimciler/app/views/view_home/home_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../views/view_splash/splash_view.dart';
 import '../views/view_onboarding/onboarding_first_view.dart';
 import '../views/view_onboarding/onboarding_second_view.dart';
 import '../views/view_onboarding/onboarding_third_view.dart';
-//import '../views/view_home/home_view.dart'; // ana sayfa
 import '../views/view_onboarding/view_model/onboarding_view_model.dart';
 
+
 class AppRouter {
+  // SENKRON: Artık Future değil, direkt Route döndürüyor
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
@@ -40,7 +40,7 @@ class AppRouter {
         );
 
       case '/home':
-        return MaterialPageRoute(builder: (_) => const HomeScreen());
+        return MaterialPageRoute(builder: (_) => const HomeView());
 
       default:
         return MaterialPageRoute(
