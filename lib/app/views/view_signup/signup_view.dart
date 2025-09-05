@@ -273,7 +273,7 @@ class SignUpView extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
-                          'Please enter a valid email address',
+                          'Please use a valid @gmail or @yahoo email address',
                           style: GoogleFonts.poppins(
                             color: Colors.red,
                             fontSize: 12,
@@ -544,7 +544,7 @@ class SignUpView extends StatelessWidget {
                               // Google ile kayıt
                             },
                             icon: Image.asset(
-                              'assets/icons/google.png',
+                              'assets/png/icons/google.png',
                               width: 24,
                               height: 24,
                               errorBuilder: (context, error, stackTrace) {
