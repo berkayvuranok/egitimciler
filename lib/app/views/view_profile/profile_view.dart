@@ -2,6 +2,7 @@ import 'package:egitimciler/app/views/view_home/home_view.dart';
 import 'package:egitimciler/app/views/view_profile/view_model/profile_event.dart';
 import 'package:egitimciler/app/views/view_profile/view_model/profile_state.dart';
 import 'package:egitimciler/app/views/view_profile/view_model/profile_view_model.dart';
+import 'package:egitimciler/app/views/view_search/search_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -59,7 +60,7 @@ class ProfileView extends StatelessWidget {
     'İstanbul Lisesi',
     'Robert Kolej',
     'Kabataş Erkek Lisesi',
-    'Çapa Fen Lisesi',  
+    'Çapa Fen Lisesi',
     'Beşiktaş Anadolu Lisesi',
     'Saint Joseph Fransız Lisesi',
     'Cağaloğlu Anadolu Lisesi',
@@ -96,7 +97,10 @@ class ProfileView extends StatelessWidget {
                   children: const [
                     Icon(Icons.check_circle, color: Colors.white, size: 20),
                     SizedBox(width: 8),
-                    Text("Profile saved successfully", style: TextStyle(color: Colors.white)),
+                    Text(
+                      "Profile saved successfully",
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ],
                 ),
                 backgroundColor: Colors.green,
@@ -107,9 +111,18 @@ class ProfileView extends StatelessWidget {
               SnackBar(
                 content: Row(
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
-                    Expanded(child: Text(state.errorMessage!, style: const TextStyle(color: Colors.white))),
+                    Expanded(
+                      child: Text(
+                        state.errorMessage!,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ],
                 ),
                 backgroundColor: Colors.red,
@@ -138,7 +151,10 @@ class ProfileView extends StatelessWidget {
               ),
               filled: true,
               fillColor: Colors.white,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
             );
           }
 
@@ -177,7 +193,7 @@ class ProfileView extends StatelessWidget {
                   icon: const Icon(Icons.logout),
                   tooltip: "Logout",
                   onPressed: () => handleLogout(context),
-                )
+                ),
               ],
             ),
             body: SingleChildScrollView(
@@ -186,7 +202,10 @@ class ProfileView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Full name
-                  Text("Full Name", style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                  Text(
+                    "Full Name",
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                  ),
                   const SizedBox(height: 8),
                   TextFormField(
                     key: ValueKey('fullName_${state.fullName}'),
@@ -199,69 +218,97 @@ class ProfileView extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   // Email
-                  Text("Email", style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                  Text(
+                    "Email",
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                  ),
                   const SizedBox(height: 8),
                   TextFormField(
                     key: ValueKey('email_${state.email}'),
-                    initialValue: state.email.isNotEmpty ? state.email : currentUser?.email ?? '',
+                    initialValue: state.email.isNotEmpty
+                        ? state.email
+                        : currentUser?.email ?? '',
                     readOnly: true,
                     decoration: modernInput(),
                   ),
                   const SizedBox(height: 24),
 
                   // Role
-                  Text("Role", style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                  Text(
+                    "Role",
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                  ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: state.role.isNotEmpty ? state.role : null,
                     items: const ["Teacher", "Student"]
-                        .map((role) => DropdownMenuItem(
-                              value: role,
-                              child: Text(role),
-                            ))
+                        .map(
+                          (role) =>
+                              DropdownMenuItem(value: role, child: Text(role)),
+                        )
                         .toList(),
-                    onChanged: (value) => bloc.add(ProfileFieldChanged(role: value)),
+                    onChanged: (value) =>
+                        bloc.add(ProfileFieldChanged(role: value)),
                     decoration: modernInput(),
                     dropdownColor: Colors.white,
                   ),
                   const SizedBox(height: 16),
 
                   // Gender
-                  Text("Gender", style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                  Text(
+                    "Gender",
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                  ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: state.gender.isNotEmpty ? state.gender : null,
                     items: const ["Male", "Female"]
-                        .map((g) => DropdownMenuItem(
-                              value: g,
-                              child: Text(g),
-                            ))
+                        .map((g) => DropdownMenuItem(value: g, child: Text(g)))
                         .toList(),
-                    onChanged: (value) => bloc.add(ProfileFieldChanged(gender: value)),
+                    onChanged: (value) =>
+                        bloc.add(ProfileFieldChanged(gender: value)),
                     decoration: modernInput(),
                     dropdownColor: Colors.white,
                   ),
                   const SizedBox(height: 16),
 
                   // Education Level
-                  Text("Education Level", style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                  Text(
+                    "Education Level",
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                  ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
-                    value: state.educationLevel.isNotEmpty ? state.educationLevel : null,
-                    items: const ["Middle School","High School","University","Master","PhD"]
-                        .map((edu) => DropdownMenuItem(
-                              value: edu,
-                              child: Text(edu),
-                            ))
-                        .toList(),
-                    onChanged: (value) => bloc.add(ProfileFieldChanged(educationLevel: value)),
+                    value: state.educationLevel.isNotEmpty
+                        ? state.educationLevel
+                        : null,
+                    items:
+                        const [
+                              "Middle School",
+                              "High School",
+                              "University",
+                              "Master",
+                              "PhD",
+                            ]
+                            .map(
+                              (edu) => DropdownMenuItem(
+                                value: edu,
+                                child: Text(edu),
+                              ),
+                            )
+                            .toList(),
+                    onChanged: (value) =>
+                        bloc.add(ProfileFieldChanged(educationLevel: value)),
                     decoration: modernInput(),
                     dropdownColor: Colors.white,
                   ),
                   const SizedBox(height: 16),
 
                   // School (Autocomplete)
-                  Text("School", style: GoogleFonts.poppins(fontWeight: FontWeight.w500)),
+                  Text(
+                    "School",
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                  ),
                   const SizedBox(height: 8),
                   Autocomplete<String>(
                     initialValue: TextEditingValue(text: state.school),
@@ -269,20 +316,26 @@ class ProfileView extends StatelessWidget {
                       if (textEditingValue.text == '') {
                         return getSchoolOptions();
                       }
-                      return getSchoolOptions()
-                          .where((option) => option.toLowerCase().contains(textEditingValue.text.toLowerCase()));
-                    },
-                    onSelected: (value) => bloc.add(ProfileFieldChanged(school: value)),
-                    fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
-                      controller.text = state.school;
-                      return TextFormField(
-                        controller: controller,
-                        focusNode: focusNode,
-                        onEditingComplete: onEditingComplete,
-                        onChanged: (val) => bloc.add(ProfileFieldChanged(school: val)),
-                        decoration: modernInput(hint: "Enter your school"),
+                      return getSchoolOptions().where(
+                        (option) => option.toLowerCase().contains(
+                          textEditingValue.text.toLowerCase(),
+                        ),
                       );
                     },
+                    onSelected: (value) =>
+                        bloc.add(ProfileFieldChanged(school: value)),
+                    fieldViewBuilder:
+                        (context, controller, focusNode, onEditingComplete) {
+                          controller.text = state.school;
+                          return TextFormField(
+                            controller: controller,
+                            focusNode: focusNode,
+                            onEditingComplete: onEditingComplete,
+                            onChanged: (val) =>
+                                bloc.add(ProfileFieldChanged(school: val)),
+                            decoration: modernInput(hint: "Enter your school"),
+                          );
+                        },
                   ),
                   const SizedBox(height: 32),
 
@@ -291,11 +344,15 @@ class ProfileView extends StatelessWidget {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: state.isSaving ? null : () => bloc.add(const SaveProfile()),
+                      onPressed: state.isSaving
+                          ? null
+                          : () => bloc.add(const SaveProfile()),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                         elevation: 2,
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                       ),
@@ -303,9 +360,18 @@ class ProfileView extends StatelessWidget {
                           ? const SizedBox(
                               width: 24,
                               height: 24,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 3,
+                              ),
                             )
-                          : Text("Save Profile", style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)),
+                          : Text(
+                              "Save Profile",
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                     ),
                   ),
                 ],
@@ -320,7 +386,10 @@ class ProfileView extends StatelessWidget {
                   );
                   break;
                 case 1:
-                  // Search page
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SearchView()),
+                  );
                   break;
                 case 2:
                   // My Learning page
@@ -352,9 +421,15 @@ class ProfileView extends StatelessWidget {
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Featured'),
         BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-        BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'My Learning'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.menu_book),
+          label: 'My Learning',
+        ),
         BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'WishList'),
-        BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Account'),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.account_circle),
+          label: 'Account',
+        ),
       ],
     );
   }

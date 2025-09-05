@@ -186,7 +186,7 @@ class LoginView extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
-                          'Please use a valid @gmail or @yahoo email address',
+                          'please enter a valid mail',
                           style: GoogleFonts.poppins(
                             color: Colors.red,
                             fontSize: 12,
@@ -404,7 +404,7 @@ class LoginView extends StatelessWidget {
                               // Google ile giriş
                             },
                             icon: Image.asset(
-                              'assets/icons/google.png',
+                              'assets/png/icons/google.png',
                               width: 24,
                               height: 24,
                               errorBuilder: (context, error, stackTrace) {
@@ -522,8 +522,14 @@ class LoginView extends StatelessWidget {
           },
         ),
         bottomNavigationBar: _buildBottomNavBar(4, (index) {
-          if (index != 4) {
+          if (index == 0) {
             Navigator.pushReplacementNamed(context, '/home');
+          } else if (index == 1) {
+            Navigator.pushReplacementNamed(context, '/search');
+          } else if (index == 2) {
+            Navigator.pushReplacementNamed(context, '/my_learning');
+          } else if (index == 3) {
+            Navigator.pushReplacementNamed(context, '/wishlist');
           }
         }),
       ),

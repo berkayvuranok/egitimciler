@@ -253,22 +253,22 @@ class _HomeViewState extends State<HomeView> {
   }
 
   void _handleBottomNavTap(int index) {
-    if (index == 4) { // Account index
-      // Kullanıcı oturum açmış mı kontrol et
-      final user = supabase.auth.currentUser;
-      if (user == null) {
-        // Login sayfasına yönlendir
-        Navigator.pushNamed(context, '/login');
-      } else {
-        // Profile sayfasına yönlendir
-        Navigator.pushNamed(context, '/profile');
-      }
+  if (index == 1) { // Search tab index
+    Navigator.pushNamed(context, '/search');
+  } else if (index == 4) { // Account tab
+    final user = supabase.auth.currentUser;
+    if (user == null) {
+      Navigator.pushNamed(context, '/login');
     } else {
-      setState(() {
-        currentIndex = index;
-      });
+      Navigator.pushNamed(context, '/profile');
     }
+  } else {
+    setState(() {
+      currentIndex = index;
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
