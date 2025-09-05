@@ -1,5 +1,6 @@
 import 'package:egitimciler/app/views/view_home/home_view.dart';
 import 'package:egitimciler/app/views/view_login/login_view.dart';
+import 'package:egitimciler/app/views/view_signup/signup_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../views/view_splash/splash_view.dart';
@@ -46,6 +47,9 @@ class AppRouter {
 
       case '/login': // Login route'u eklendi
         return MaterialPageRoute(builder: (_) => const LoginView());
+      // AppRouter.dart dosyasına ekleyin
+case '/signup':
+  return MaterialPageRoute(builder: (_) => const SignUpView());
 
       case '/profile': // Profile route'u eklendi
         return MaterialPageRoute(builder: (_) => const ProfileView());

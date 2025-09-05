@@ -1,32 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:egitimciler/app/views/view_login/view_model/login_event.dart';
-import 'package:egitimciler/app/views/view_login/view_model/login_state.dart';
 import 'package:egitimciler/app/views/view_login/view_model/login_view_model.dart';
-import 'package:egitimciler/app/views/view_profile/profile_view.dart';
-import 'package:egitimciler/app/views/view_signup/signup_view.dart';
+import 'package:egitimciler/app/views/view_signup/view_model/signup_event.dart';
+import 'package:egitimciler/app/views/view_signup/view_model/signup_state.dart';
+import 'package:egitimciler/app/views/view_signup/view_model/signup_view_model.dart';
 
-class LoginView extends StatelessWidget {
-  const LoginView({super.key});
+class SignUpView extends StatelessWidget {
+  const SignUpView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => LoginViewModel(),
+      create: (_) => SignUpViewModel(),
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: BlocConsumer<LoginViewModel, LoginState>(
+        body: BlocConsumer<SignUpViewModel, SignUpState>(
           listener: (context, state) {
             if (state.isSuccess) {
-              // Başarılı girişte snackbar göster
+              // Başarılı kayıtta snackbar göster
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Row(
                     children: [
                       Icon(Icons.check_circle, color: Colors.white, size: 20),
                       SizedBox(width: 8),
-                      Text('Login successful!', style: GoogleFonts.poppins(color: Colors.white)),
+                      Text('Registration successful! Please sign in.', 
+                          style: GoogleFonts.poppins(color: Colors.white)),
                     ],
                   ),
                   backgroundColor: Colors.green,
@@ -35,12 +35,9 @@ class LoginView extends StatelessWidget {
                 ),
               );
               
-              // Profile sayfasına yönlendir
+              // 1.5 saniye sonra login sayfasına dön
               Future.delayed(Duration(milliseconds: 1500), () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ProfileView()),
-                );
+                Navigator.pop(context);
               });
             } else if (state.errorMessage != null) {
               // Hata durumunda snackbar göster
@@ -50,7 +47,8 @@ class LoginView extends StatelessWidget {
                     children: [
                       Icon(Icons.error_outline, color: Colors.white, size: 20),
                       SizedBox(width: 8),
-                      Text(state.errorMessage!, style: GoogleFonts.poppins(color: Colors.white)),
+                      Text(state.errorMessage!, 
+                          style: GoogleFonts.poppins(color: Colors.white)),
                     ],
                   ),
                   backgroundColor: Colors.red,
@@ -61,12 +59,18 @@ class LoginView extends StatelessWidget {
             }
           },
           builder: (context, state) {
-            final bloc = context.read<LoginViewModel>();
+            final bloc = context.read<SignUpViewModel>();
             final size = MediaQuery.of(context).size;
-            final bool isValidEmail = state.email.contains('@gmail.') || state.email.contains('@yahoo.');
+            
+            // Validasyon kontrolü
+            final bool isValidEmail = state.email.contains('@');
             final bool isEmailEmpty = state.email.isEmpty;
             final bool isValidPassword = _validatePassword(state.password);
             final bool isPasswordEmpty = state.password.isEmpty;
+            final bool passwordsMatch = state.password == state.confirmPassword;
+            final bool isConfirmPasswordEmpty = state.confirmPassword.isEmpty;
+            final bool isValidName = state.fullName.length >= 3;
+            final bool isNameEmpty = state.fullName.isEmpty;
 
             return SingleChildScrollView(
               child: Padding(
@@ -74,33 +78,41 @@ class LoginView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: size.height * 0.08),
+                    SizedBox(height: size.height * 0.06),
+                    
+                    // Back Button
+                    IconButton(
+                      icon: Icon(Icons.arrow_back, color: Colors.grey.shade700),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    
+                    SizedBox(height: 20),
                     
                     // Logo
                     Center(
                       child: Image.asset(
                         'assets/png/splash/splash.png',
-                        width: 120,
-                        height: 120,
+                        width: 100,
+                        height: 100,
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            width: 120,
-                            height: 120,
+                            width: 100,
+                            height: 100,
                             decoration: BoxDecoration(
                               color: Colors.blue,
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Icon(Icons.school, size: 60, color: Colors.white),
+                            child: Icon(Icons.school, size: 50, color: Colors.white),
                           );
                         },
                       ),
                     ),
                     
-                    SizedBox(height: size.height * 0.04),
+                    SizedBox(height: size.height * 0.03),
                     
                     // Welcome Text
                     Text(
-                      'Welcome Back!',
+                      'Create Account',
                       style: GoogleFonts.poppins(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -111,14 +123,89 @@ class LoginView extends StatelessWidget {
                     SizedBox(height: 8),
                     
                     Text(
-                      'Sign in to continue your learning journey',
+                      'Join us to start your learning journey',
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         color: Colors.grey.shade600,
                       ),
                     ),
                     
-                    SizedBox(height: size.height * 0.06),
+                    SizedBox(height: size.height * 0.04),
+                    
+                    // Full Name Field
+                    Text(
+                      'Full Name',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    TextField(
+                      onChanged: (value) => bloc.add(SignUpFullNameChanged(value)),
+                      decoration: InputDecoration(
+                        hintText: "Enter your full name",
+                        hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: !isNameEmpty 
+                              ? (isValidName ? Colors.green : Colors.red)
+                              : Colors.grey.shade300,
+                            width: !isNameEmpty ? 2 : 1,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: !isNameEmpty 
+                              ? (isValidName ? Colors.green : Colors.red)
+                              : Colors.grey.shade300,
+                            width: !isNameEmpty ? 2 : 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: !isNameEmpty 
+                              ? (isValidName ? Colors.green : Colors.blue)
+                              : Colors.blue,
+                            width: 2,
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        prefixIcon: Icon(
+                          Icons.person_outline, 
+                          color: !isNameEmpty 
+                            ? (isValidName ? Colors.green : Colors.red)
+                            : Colors.grey.shade600,
+                        ),
+                        suffixIcon: !isNameEmpty
+                          ? Icon(
+                              isValidName ? Icons.check_circle : Icons.error,
+                              color: isValidName ? Colors.green : Colors.red,
+                            )
+                          : null,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      ),
+                      style: GoogleFonts.poppins(),
+                    ),
+                    
+                    if (!isNameEmpty && !isValidName)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          'Name must be at least 3 characters long',
+                          style: GoogleFonts.poppins(
+                            color: Colors.red,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    
+                    SizedBox(height: 20),
                     
                     // Email Field
                     Text(
@@ -131,7 +218,7 @@ class LoginView extends StatelessWidget {
                     ),
                     SizedBox(height: 8),
                     TextField(
-                      onChanged: (value) => bloc.add(LoginEmailChanged(value)),
+                      onChanged: (value) => bloc.add(SignUpEmailChanged(value)),
                       decoration: InputDecoration(
                         hintText: "Enter your email",
                         hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400),
@@ -186,7 +273,7 @@ class LoginView extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
-                          'Please use a valid @gmail or @yahoo email address',
+                          'Please enter a valid email address',
                           style: GoogleFonts.poppins(
                             color: Colors.red,
                             fontSize: 12,
@@ -208,9 +295,9 @@ class LoginView extends StatelessWidget {
                     SizedBox(height: 8),
                     TextField(
                       obscureText: true,
-                      onChanged: (value) => bloc.add(LoginPasswordChanged(value)),
+                      onChanged: (value) => bloc.add(SignUpPasswordChanged(value)),
                       decoration: InputDecoration(
-                        hintText: "Enter your password",
+                        hintText: "Create a password",
                         hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -252,15 +339,7 @@ class LoginView extends StatelessWidget {
                               isValidPassword ? Icons.check_circle : Icons.error,
                               color: isValidPassword ? Colors.green : Colors.red,
                             )
-                          : IconButton(
-                              icon: Icon(
-                                Icons.visibility_outlined,
-                                color: Colors.grey.shade600,
-                              ),
-                              onPressed: () {
-                                // Şifre görünürlüğü toggle
-                              },
-                            ),
+                          : null,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
                       style: GoogleFonts.poppins(),
@@ -278,43 +357,104 @@ class LoginView extends StatelessWidget {
                         ),
                       ),
                     
-                    SizedBox(height: 16),
+                    SizedBox(height: 20),
                     
-                    // Forgot Password
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          _showForgotPasswordDialog(context);
-                        },
+                    // Confirm Password Field
+                    Text(
+                      'Confirm Password',
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    TextField(
+                      obscureText: true,
+                      onChanged: (value) => bloc.add(SignUpConfirmPasswordChanged(value)),
+                      decoration: InputDecoration(
+                        hintText: "Confirm your password",
+                        hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: !isConfirmPasswordEmpty 
+                              ? (passwordsMatch ? Colors.green : Colors.red)
+                              : Colors.grey.shade300,
+                            width: !isConfirmPasswordEmpty ? 2 : 1,
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: !isConfirmPasswordEmpty 
+                              ? (passwordsMatch ? Colors.green : Colors.red)
+                              : Colors.grey.shade300,
+                            width: !isConfirmPasswordEmpty ? 2 : 1,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(
+                            color: !isConfirmPasswordEmpty 
+                              ? (passwordsMatch ? Colors.green : Colors.blue)
+                              : Colors.blue,
+                            width: 2,
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                        prefixIcon: Icon(
+                          Icons.lock_outline, 
+                          color: !isConfirmPasswordEmpty 
+                            ? (passwordsMatch ? Colors.green : Colors.red)
+                            : Colors.grey.shade600,
+                        ),
+                        suffixIcon: !isConfirmPasswordEmpty
+                          ? Icon(
+                              passwordsMatch ? Icons.check_circle : Icons.error,
+                              color: passwordsMatch ? Colors.green : Colors.red,
+                            )
+                          : null,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      ),
+                      style: GoogleFonts.poppins(),
+                    ),
+                    
+                    if (!isConfirmPasswordEmpty && !passwordsMatch)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
-                          'Forgot Password?',
+                          'Passwords do not match',
                           style: GoogleFonts.poppins(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.w500,
+                            color: Colors.red,
+                            fontSize: 12,
                           ),
                         ),
                       ),
-                    ),
                     
                     SizedBox(height: 24),
                     
-                    // Login Button
+                    // Sign Up Button
                     SizedBox(
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: (state.isSubmitting || !isValidEmail || !isValidPassword)
+                        onPressed: (state.isSubmitting || !isValidName || !isValidEmail || !isValidPassword || !passwordsMatch)
                             ? null
                             : () {
-                                if (isValidEmail && isValidPassword) {
-                                  bloc.add(LoginSubmitted());
+                                if (isValidName && isValidEmail && isValidPassword && passwordsMatch) {
+                                  bloc.add(SignUpSubmitted());
                                 } else {
                                   String errorMessage = '';
-                                  if (!isValidEmail) {
-                                    errorMessage = 'Please use a valid email address';
+                                  if (!isValidName) {
+                                    errorMessage = 'Please enter a valid name';
+                                  } else if (!isValidEmail) {
+                                    errorMessage = 'Please enter a valid email address';
                                   } else if (!isValidPassword) {
                                     errorMessage = 'Password must be at least 10 characters long, contain uppercase, lowercase, and special characters';
+                                  } else if (!passwordsMatch) {
+                                    errorMessage = 'Passwords do not match';
                                   }
                                   
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -344,7 +484,7 @@ class LoginView extends StatelessWidget {
                                 ),
                               )
                             : Text(
-                                'Sign In',
+                                'Create Account',
                                 style: GoogleFonts.poppins(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -364,7 +504,7 @@ class LoginView extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
-                            'Or continue with',
+                            'Or sign up with',
                             style: GoogleFonts.poppins(
                               color: Colors.grey.shade600,
                               fontSize: 14,
@@ -379,7 +519,7 @@ class LoginView extends StatelessWidget {
                     
                     SizedBox(height: 24),
                     
-                    // Social Login Buttons
+                    // Social Sign Up Buttons
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -401,7 +541,7 @@ class LoginView extends StatelessWidget {
                           ),
                           child: IconButton(
                             onPressed: () {
-                              // Google ile giriş
+                              // Google ile kayıt
                             },
                             icon: Image.asset(
                               'assets/icons/google.png',
@@ -433,7 +573,7 @@ class LoginView extends StatelessWidget {
                           ),
                           child: IconButton(
                             onPressed: () {
-                              // Apple ile giriş
+                              // Apple ile kayıt
                             },
                             icon: Image.asset(
                               'assets/icons/apple.png',
@@ -465,7 +605,7 @@ class LoginView extends StatelessWidget {
                           ),
                           child: IconButton(
                             onPressed: () {
-                              // Facebook ile giriş
+                              // Facebook ile kayıt
                             },
                             icon: Image.asset(
                               'assets/icons/facebook.png',
@@ -480,29 +620,24 @@ class LoginView extends StatelessWidget {
                       ],
                     ),
                     
-                    SizedBox(height: size.height * 0.05),
+                    SizedBox(height: size.height * 0.04),
                     
-                    // Sign Up Link
+                    // Login Link
                     Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Don't have an account? ",
+                            "Already have an account? ",
                             style: GoogleFonts.poppins(
                               color: Colors.grey.shade600,
                               fontSize: 14,
                             ),
                           ),
                           GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const SignUpView()),
-                              );
-                            },
+                            onTap: () => Navigator.pop(context),
                             child: Text(
-                              'Sign Up',
+                              'Sign In',
                               style: GoogleFonts.poppins(
                                 color: Colors.blue,
                                 fontWeight: FontWeight.w600,
@@ -521,11 +656,6 @@ class LoginView extends StatelessWidget {
             );
           },
         ),
-        bottomNavigationBar: _buildBottomNavBar(4, (index) {
-          if (index != 4) {
-            Navigator.pushReplacementNamed(context, '/home');
-          }
-        }),
       ),
     );
   }
@@ -537,100 +667,5 @@ class LoginView extends StatelessWidget {
     if (!password.contains(RegExp(r'[0-9]'))) return false;
     if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) return false;
     return true;
-  }
-
-  void _showForgotPasswordDialog(BuildContext context) {
-    final emailController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Forgot Password', style: GoogleFonts.poppins()),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Enter your email address to reset your password',
-                style: GoogleFonts.poppins(color: Colors.grey.shade600),
-              ),
-              SizedBox(height: 16),
-              TextField(
-                controller: emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-                keyboardType: TextInputType.emailAddress,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Cancel', style: GoogleFonts.poppins()),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                final email = emailController.text.trim();
-                if (email.contains('@gmail.') || email.contains('@yahoo.')) {
-                  // Şifre sıfırlama işlemi
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Password reset link sent to $email'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Please enter a valid email address'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
-              child: Text('Send Reset Link', style: GoogleFonts.poppins()),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  BottomNavigationBar _buildBottomNavBar(int currentIndex, Function(int) onTap) {
-    return BottomNavigationBar(
-      backgroundColor: Colors.white,
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.black54,
-      currentIndex: currentIndex,
-      type: BottomNavigationBarType.fixed,
-      selectedLabelStyle: GoogleFonts.poppins(fontSize: 12),
-      unselectedLabelStyle: GoogleFonts.poppins(fontSize: 12),
-      onTap: (index) => onTap(index),
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.star, size: 24),
-          label: 'Featured',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.search, size: 24),
-          label: 'Search',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.menu_book, size: 24),
-          label: 'My Learning',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.favorite, size: 24),
-          label: 'WishList',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.account_circle, size: 24),
-          label: 'Account',
-        ),
-      ],
-    );
   }
 }
