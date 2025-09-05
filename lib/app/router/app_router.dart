@@ -1,4 +1,5 @@
 import 'package:egitimciler/app/views/view_home/home_view.dart';
+import 'package:egitimciler/app/views/view_login/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../views/view_splash/splash_view.dart';
@@ -6,7 +7,8 @@ import '../views/view_onboarding/onboarding_first_view.dart';
 import '../views/view_onboarding/onboarding_second_view.dart';
 import '../views/view_onboarding/onboarding_third_view.dart';
 import '../views/view_onboarding/view_model/onboarding_view_model.dart';
-
+ // Login sayfasını ekleyin
+import '../views/view_profile/profile_view.dart'; // Profile sayfasını ekleyin
 
 class AppRouter {
   // SENKRON: Artık Future değil, direkt Route döndürüyor
@@ -41,6 +43,12 @@ class AppRouter {
 
       case '/home':
         return MaterialPageRoute(builder: (_) => const HomeView());
+
+      case '/login': // Login route'u eklendi
+        return MaterialPageRoute(builder: (_) => const LoginView());
+
+      case '/profile': // Profile route'u eklendi
+        return MaterialPageRoute(builder: (_) => const ProfileView());
 
       default:
         return MaterialPageRoute(

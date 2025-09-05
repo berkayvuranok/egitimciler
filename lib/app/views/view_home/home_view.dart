@@ -252,6 +252,24 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
+  void _handleBottomNavTap(int index) {
+    if (index == 4) { // Account index
+      // Kullanıcı oturum açmış mı kontrol et
+      final user = supabase.auth.currentUser;
+      if (user == null) {
+        // Login sayfasına yönlendir
+        Navigator.pushNamed(context, '/login');
+      } else {
+        // Profile sayfasına yönlendir
+        Navigator.pushNamed(context, '/profile');
+      }
+    } else {
+      setState(() {
+        currentIndex = index;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -272,27 +290,48 @@ class _HomeViewState extends State<HomeView> {
           ],
         ),
       ),
-      bottomNavigationBar: buildBottomNavBar(currentIndex, (index) {
-        setState(() {
-          currentIndex = index;
-        });
-      }),
+      bottomNavigationBar: buildBottomNavBar(currentIndex, _handleBottomNavTap),
     );
   }
 }
 
 /// Category Products Page
-class CategoryProductsPage extends StatelessWidget {
+class CategoryProductsPage extends StatefulWidget {
   final String category;
   const CategoryProductsPage({super.key, required this.category});
 
+  @override
+  State<CategoryProductsPage> createState() => _CategoryProductsPageState();
+}
+
+class _CategoryProductsPageState extends State<CategoryProductsPage> {
+  int currentIndex = 0;
+  final SupabaseClient supabase = Supabase.instance.client;
+
+  void _handleBottomNavTap(int index) {
+    if (index == 4) { // Account index
+      // Kullanıcı oturum açmış mı kontrol et
+      final user = supabase.auth.currentUser;
+      if (user == null) {
+        // Login sayfasına yönlendir
+        Navigator.pushNamed(context, '/login');
+      } else {
+        // Profile sayfasına yönlendir
+        Navigator.pushNamed(context, '/profile');
+      }
+    } else {
+      setState(() {
+        currentIndex = index;
+      });
+    }
+  }
+
   Future<List<Map<String, dynamic>>> fetchCategoryProducts() async {
-    final supabase = Supabase.instance.client;
     try {
       final response = await supabase
           .from('products')
           .select()
-          .eq('category', category)
+          .eq('category', widget.category)
           .order('created_at', ascending: false);
       if (response != null) {
         return List<Map<String, dynamic>>.from(response);
@@ -315,7 +354,7 @@ class CategoryProductsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(category, style: GoogleFonts.poppins()),
+        title: Text(widget.category, style: GoogleFonts.poppins()),
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black87,
@@ -400,6 +439,7 @@ class CategoryProductsPage extends StatelessWidget {
           );
         },
       ),
+      bottomNavigationBar: buildBottomNavBar(currentIndex, _handleBottomNavTap),
     );
   }
 }
@@ -418,11 +458,30 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   int currentIndex = 0;
   double currentRating = 0.0;
   final TextEditingController commentController = TextEditingController();
+  final SupabaseClient supabase = Supabase.instance.client;
 
   @override
   void initState() {
     super.initState();
     currentRating = (widget.product['rating'] ?? 0.0).toDouble();
+  }
+
+  void _handleBottomNavTap(int index) {
+    if (index == 4) { // Account index
+      // Kullanıcı oturum açmış mı kontrol et
+      final user = supabase.auth.currentUser;
+      if (user == null) {
+        // Login sayfasına yönlendir
+        Navigator.pushNamed(context, '/login');
+      } else {
+        // Profile sayfasına yönlendir
+        Navigator.pushNamed(context, '/profile');
+      }
+    } else {
+      setState(() {
+        currentIndex = index;
+      });
+    }
   }
 
   Future<void> updateRating(double rating) async {
@@ -431,7 +490,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       widget.product['rating'] = rating;
     });
     try {
-      await Supabase.instance.client
+      await supabase
           .from('products')
           .update({'rating': rating})
           .eq('id', widget.product['id']);
@@ -681,7 +740,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           ),
         ),
       ),
-      bottomNavigationBar: buildBottomNavBar(currentIndex, (index) {}),
+      bottomNavigationBar: buildBottomNavBar(currentIndex, _handleBottomNavTap),
     );
   }
 }
