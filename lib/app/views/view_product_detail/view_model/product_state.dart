@@ -1,28 +1,39 @@
-import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 
-abstract class ProductDetailState extends Equatable {
-  const ProductDetailState();
+@immutable
+abstract class ProductState {}
 
-  @override
-  List<Object?> get props => [];
-}
+class ProductLoading extends ProductState {}
 
-class ProductDetailInitial extends ProductDetailState {}
-
-class ProductDetailLoading extends ProductDetailState {}
-
-class ProductDetailLoaded extends ProductDetailState {
+class ProductLoaded extends ProductState {
   final Map<String, dynamic> product;
-  const ProductDetailLoaded(this.product);
+  final double rating;
+  final List<dynamic> comments;
+  final bool isFavorite;
 
-  @override
-  List<Object?> get props => [product];
+  ProductLoaded({
+    required this.product,
+    required this.rating,
+    required this.comments,
+    this.isFavorite = false,
+  });
+
+  ProductLoaded copyWith({
+    Map<String, dynamic>? product,
+    double? rating,
+    List<dynamic>? comments,
+    bool? isFavorite,
+  }) {
+    return ProductLoaded(
+      product: product ?? this.product,
+      rating: rating ?? this.rating,
+      comments: comments ?? this.comments,
+      isFavorite: isFavorite ?? this.isFavorite,
+    );
+  }
 }
 
-class ProductDetailError extends ProductDetailState {
+class ProductError extends ProductState {
   final String message;
-  const ProductDetailError(this.message);
-
-  @override
-  List<Object?> get props => [message];
+  ProductError(this.message);
 }
