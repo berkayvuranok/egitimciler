@@ -102,7 +102,9 @@ class _ProductDetailContentState extends State<_ProductDetailContent> {
         if (state is ProductLoaded) {
           final product = state.product;
           final imageUrl = _getImageUrl(product['image_url']);
-          final comments = state.comments;
+          final List<String> comments = state.comments
+              .map<String>((c) => c.toString())
+              .toList(); // Supabase’den gelen string commentleri düz listeye dönüştür
           final rating = state.rating;
 
           return Scaffold(
@@ -138,8 +140,6 @@ class _ProductDetailContentState extends State<_ProductDetailContent> {
                   Text('Duration: ${product['duration']}', style: GoogleFonts.poppins(fontSize: 16)),
                   const SizedBox(height: 4),
                   Text('Rating: ${rating.toStringAsFixed(1)} ★', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
-                  Text('Instructor: ${product['instructor']}', style: GoogleFonts.poppins(fontSize: 14, color: Colors.black54)),
                   const SizedBox(height: 16),
                   Text('Comments:', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
                   ListView.builder(
@@ -147,20 +147,26 @@ class _ProductDetailContentState extends State<_ProductDetailContent> {
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: comments.length,
                     itemBuilder: (context, index) => ListTile(
-                      title: Text(comments[index]['text'] ?? ''),
+                      title: Text(comments[index]),
                       trailing: IconButton(
                         icon: const Icon(Icons.more_vert),
-                        onPressed: () => _showCommentOptions(context, index, state),
+                        onPressed: () => _showCommentOptions(context, index, state, comments),
                       ),
                     ),
                   ),
                   Row(
                     children: [
-                      Expanded(child: TextField(controller: commentController, decoration: const InputDecoration(hintText: 'Add a comment'))),
+                      Expanded(
+                        child: TextField(
+                          controller: commentController,
+                          decoration: const InputDecoration(hintText: 'Add a comment'),
+                        ),
+                      ),
                       IconButton(
                         icon: const Icon(Icons.send),
                         onPressed: () {
                           if (commentController.text.isNotEmpty) {
+                            // Düz text olarak gönderiyoruz
                             context.read<ProductViewModel>().add(AddComment(commentController.text));
                             commentController.clear();
                           }
@@ -193,7 +199,7 @@ class _ProductDetailContentState extends State<_ProductDetailContent> {
     );
   }
 
-  void _showCommentOptions(BuildContext context, int index, ProductLoaded state) {
+  void _showCommentOptions(BuildContext context, int index, ProductLoaded state, List<String> comments) {
     showModalBottomSheet(
       context: context,
       builder: (_) => SafeArea(
@@ -204,7 +210,7 @@ class _ProductDetailContentState extends State<_ProductDetailContent> {
               title: const Text('Edit'),
               onTap: () {
                 Navigator.pop(context);
-                final editController = TextEditingController(text: state.comments[index]['text']);
+                final editController = TextEditingController(text: comments[index]);
                 showDialog(
                   context: context,
                   builder: (_) => AlertDialog(

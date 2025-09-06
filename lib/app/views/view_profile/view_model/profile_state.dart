@@ -7,17 +7,27 @@ class ProfileState extends Equatable {
   final String gender;
   final String educationLevel;
   final String school;
+
+  final String lessonTitle;
+  final String lessonDescription;
+  final String lessonPrice;
+  final String lessonImageUrl;
+
   final bool isSaving;
   final bool isSuccess;
   final String? errorMessage;
 
   const ProfileState({
-    this.fullName = "",
-    this.email = "",
-    this.role = "",
-    this.gender = "",
-    this.educationLevel = "",
-    this.school = "",
+    this.fullName = '',
+    this.email = '',
+    this.role = '',
+    this.gender = '',
+    this.educationLevel = '',
+    this.school = '',
+    this.lessonTitle = '',
+    this.lessonDescription = '',
+    this.lessonPrice = '',
+    this.lessonImageUrl = '',
     this.isSaving = false,
     this.isSuccess = false,
     this.errorMessage,
@@ -30,6 +40,10 @@ class ProfileState extends Equatable {
     String? gender,
     String? educationLevel,
     String? school,
+    String? lessonTitle,
+    String? lessonDescription,
+    String? lessonPrice,
+    String? lessonImageUrl,
     bool? isSaving,
     bool? isSuccess,
     String? errorMessage,
@@ -41,9 +55,13 @@ class ProfileState extends Equatable {
       gender: gender ?? this.gender,
       educationLevel: educationLevel ?? this.educationLevel,
       school: school ?? this.school,
+      lessonTitle: lessonTitle ?? this.lessonTitle,
+      lessonDescription: lessonDescription ?? this.lessonDescription,
+      lessonPrice: lessonPrice ?? this.lessonPrice,
+      lessonImageUrl: lessonImageUrl ?? this.lessonImageUrl,
       isSaving: isSaving ?? this.isSaving,
       isSuccess: isSuccess ?? this.isSuccess,
-      errorMessage: errorMessage,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 
@@ -55,6 +73,10 @@ class ProfileState extends Equatable {
         gender,
         educationLevel,
         school,
+        lessonTitle,
+        lessonDescription,
+        lessonPrice,
+        lessonImageUrl,
         isSaving,
         isSuccess,
         errorMessage,

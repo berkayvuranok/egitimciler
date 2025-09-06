@@ -18,6 +18,7 @@ dependencies:
   supabase_flutter: ^2.10.0
   sign_in_with_apple: ^6.0.0
   google_sign_in: ^6.1.0
+  image_picker: ^0.8.7+4
    # Güncel sürüm, Android ve iOS uyumlu
 
 dev_dependencies:
