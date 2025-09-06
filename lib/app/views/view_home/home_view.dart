@@ -53,14 +53,6 @@ class _HomeViewContentState extends State<_HomeViewContent> {
     Colors.yellow
   ];
 
-  final List<String> placeholderImages = [
-    'https://picsum.photos/200/300?random=1',
-    'https://picsum.photos/200/300?random=2',
-    'https://picsum.photos/200/300?random=3',
-    'https://picsum.photos/200/300?random=4',
-    'https://picsum.photos/200/300?random=5'
-  ];
-
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.only(top: 32, bottom: 16),
@@ -109,7 +101,7 @@ class _HomeViewContentState extends State<_HomeViewContent> {
   }
 
   List<Map<String, dynamic>> _pickRandomProducts(List<Map<String, dynamic>> allProducts, int count) {
-    if (allProducts.isEmpty) return List.generate(count, (index) => _createSampleProduct(index));
+    if (allProducts.isEmpty) return [];
     if (allProducts.length <= count) return allProducts;
 
     final random = Random();
@@ -125,25 +117,8 @@ class _HomeViewContentState extends State<_HomeViewContent> {
     return picked;
   }
 
-  Map<String, dynamic> _createSampleProduct(int index) => {
-        'id': index,
-        'name': 'Sample Product ${index + 1}',
-        'description': 'Sample description',
-        'duration': '${30 + index * 5} mins',
-        'instructor': 'Instructor ${index + 1}',
-        'image_url': placeholderImages[index % placeholderImages.length],
-        'rating': Random().nextDouble() * 5,
-      };
-
-  String _getImageUrl(dynamic imageField) {
-    if (imageField == null) return 'https://via.placeholder.com/150';
-    if (imageField is String) return imageField;
-    if (imageField is List && imageField.isNotEmpty) return imageField[0];
-    return 'https://via.placeholder.com/150';
-  }
-
   Widget _buildProductItem(Map<String, dynamic> product, int index) {
-    final imageUrl = _getImageUrl(product['image_url']);
+    final imageUrl = product['lesson_image'] ?? 'https://via.placeholder.com/150';
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, '/product_detail', arguments: product);
@@ -164,13 +139,13 @@ class _HomeViewContentState extends State<_HomeViewContent> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                product['name'] ?? '',
+                product['lesson_title'] ?? '',
                 textAlign: TextAlign.center,
                 style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white),
               ),
               const SizedBox(height: 4),
               Text(
-                '${(product['rating'] ?? 0.0).toStringAsFixed(1)} ★',
+                '${(product['lesson_price'] ?? 0).toString()} \$',
                 style: GoogleFonts.poppins(fontSize: 12, color: Colors.white),
               ),
             ],
@@ -212,16 +187,15 @@ class _HomeViewContentState extends State<_HomeViewContent> {
 
         switch (index) {
           case 0:
-            // Featured - zaten Home'dayız
             break;
           case 1:
             Navigator.pushNamed(context, '/search');
             break;
           case 2:
-            Navigator.pushNamed(context, '/my_learning'); // kendi route ekle
+            Navigator.pushNamed(context, '/my_learning');
             break;
           case 3:
-            Navigator.pushNamed(context, '/wishlist'); // kendi route ekle
+            Navigator.pushNamed(context, '/wishlist');
             break;
           case 4:
             final user = Supabase.instance.client.auth.currentUser;

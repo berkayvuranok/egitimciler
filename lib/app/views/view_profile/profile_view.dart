@@ -6,12 +6,13 @@ import 'package:egitimciler/app/views/view_search/search_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:io';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
 
-  // Örnek üniversite ve lise listeleri
   static const List<String> universities = [
     'Boğaziçi University',
     'Middle East Technical University',
@@ -51,7 +52,6 @@ class ProfileView extends StatelessWidget {
     'Bayburt University',
     'Bitlis Eren University',
     'Bingöl University',
-    // diğer üniversiteler...
   ];
 
   static const List<String> highSchools = [
@@ -77,8 +77,6 @@ class ProfileView extends StatelessWidget {
     'Gaziantep Fen Lisesi',
     'Kayseri Anadolu Lisesi',
     'Malatya Fen Lisesi',
-
-    // diğer liseler...
   ];
 
   @override
@@ -133,6 +131,14 @@ class ProfileView extends StatelessWidget {
         builder: (context, state) {
           final bloc = context.read<ProfileViewModel>();
 
+          final TextEditingController lessonTitleController =
+              TextEditingController(text: state.lessonTitle);
+          final TextEditingController lessonDescriptionController =
+              TextEditingController(text: state.lessonDescription);
+          final TextEditingController lessonPriceController =
+              TextEditingController(text: state.lessonPrice);
+          XFile? lessonImage;
+
           InputDecoration modernInput({String? hint}) {
             return InputDecoration(
               hintText: hint,
@@ -176,6 +182,21 @@ class ProfileView extends StatelessWidget {
               MaterialPageRoute(builder: (_) => const HomeView()),
               (route) => false,
             );
+          }
+
+          Future<void> pickLessonImage(BuildContext context) async {
+            final picker = ImagePicker();
+            final XFile? pickedFile =
+                await picker.pickImage(source: ImageSource.gallery);
+            if (pickedFile != null) {
+              lessonImage = pickedFile;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Lesson image selected: ${pickedFile.name}"),
+                  backgroundColor: Colors.blue,
+                ),
+              );
+            }
           }
 
           return Scaffold(
@@ -254,6 +275,61 @@ class ProfileView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
+                  // Teacher-only section: Private Lesson
+                  if (state.role == "Teacher") ...[
+                    Text(
+                      "Open a Private Lesson",
+                      style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600, fontSize: 16),
+                    ),
+                    const SizedBox(height: 12),
+                    // Lesson Image
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton.icon(
+                        onPressed: () => pickLessonImage(context),
+                        icon: const Icon(Icons.photo),
+                        label: Text(
+                          "Select Lesson Image",
+                          style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600, fontSize: 16),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    // Lesson Title
+                    TextFormField(
+                      controller: lessonTitleController,
+                      decoration:
+                          modernInput(hint: "Enter lesson title"),
+                    ),
+                    const SizedBox(height: 12),
+                    // Lesson Description
+                    TextFormField(
+                      controller: lessonDescriptionController,
+                      decoration:
+                          modernInput(hint: "Enter lesson description"),
+                      maxLines: 3,
+                    ),
+                    const SizedBox(height: 12),
+                    // Lesson Price
+                    TextFormField(
+                      controller: lessonPriceController,
+                      decoration: modernInput(hint: "Enter lesson price"),
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
                   // Gender
                   Text(
                     "Gender",
@@ -282,21 +358,20 @@ class ProfileView extends StatelessWidget {
                     value: state.educationLevel.isNotEmpty
                         ? state.educationLevel
                         : null,
-                    items:
-                        const [
-                              "Middle School",
-                              "High School",
-                              "University",
-                              "Master",
-                              "PhD",
-                            ]
-                            .map(
-                              (edu) => DropdownMenuItem(
-                                value: edu,
-                                child: Text(edu),
-                              ),
-                            )
-                            .toList(),
+                    items: const [
+                      "Middle School",
+                      "High School",
+                      "University",
+                      "Master",
+                      "PhD",
+                    ]
+                        .map(
+                          (edu) => DropdownMenuItem(
+                            value: edu,
+                            child: Text(edu),
+                          ),
+                        )
+                        .toList(),
                     onChanged: (value) =>
                         bloc.add(ProfileFieldChanged(educationLevel: value)),
                     decoration: modernInput(),
@@ -326,16 +401,16 @@ class ProfileView extends StatelessWidget {
                         bloc.add(ProfileFieldChanged(school: value)),
                     fieldViewBuilder:
                         (context, controller, focusNode, onEditingComplete) {
-                          controller.text = state.school;
-                          return TextFormField(
-                            controller: controller,
-                            focusNode: focusNode,
-                            onEditingComplete: onEditingComplete,
-                            onChanged: (val) =>
-                                bloc.add(ProfileFieldChanged(school: val)),
-                            decoration: modernInput(hint: "Enter your school"),
-                          );
-                        },
+                      controller.text = state.school;
+                      return TextFormField(
+                        controller: controller,
+                        focusNode: focusNode,
+                        onEditingComplete: onEditingComplete,
+                        onChanged: (val) =>
+                            bloc.add(ProfileFieldChanged(school: val)),
+                        decoration: modernInput(hint: "Enter your school"),
+                      );
+                    },
                   ),
                   const SizedBox(height: 32),
 
@@ -434,3 +509,4 @@ class ProfileView extends StatelessWidget {
     );
   }
 }
+
