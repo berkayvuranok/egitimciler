@@ -6,12 +6,11 @@ import 'category_state.dart';
 class CategoryViewModel extends Bloc<CategoryEvent, CategoryState> {
   final SupabaseClient supabase;
 
-  CategoryViewModel({required this.supabase}) : super(CategoryInitial()) {
+  CategoryViewModel(this.supabase) : super(CategoryLoading()) {
     on<LoadCategoryProducts>(_onLoadCategoryProducts);
   }
 
-  Future<void> _onLoadCategoryProducts(
-      LoadCategoryProducts event, Emitter<CategoryState> emit) async {
+  Future<void> _onLoadCategoryProducts(LoadCategoryProducts event, Emitter<CategoryState> emit) async {
     emit(CategoryLoading());
     try {
       final response = await supabase
@@ -21,14 +20,12 @@ class CategoryViewModel extends Bloc<CategoryEvent, CategoryState> {
           .order('created_at', ascending: false);
 
       if (response != null) {
-        final products = List<Map<String, dynamic>>.from(response);
-        emit(CategoryLoaded(products));
+        emit(CategoryLoaded(List<Map<String, dynamic>>.from(response)));
       } else {
-        emit(const CategoryError('No products found.'));
+        emit(CategoryLoaded([]));
       }
     } catch (e) {
-      emit(CategoryError(e.toString()));
+      emit(CategoryError('Failed to load products: $e'));
     }
   }
 }
-
