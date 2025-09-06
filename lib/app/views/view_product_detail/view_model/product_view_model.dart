@@ -18,7 +18,7 @@ class ProductViewModel extends Bloc<ProductEvent, ProductState> {
   Future<void> _onLoadProductDetail(LoadProductDetail event, Emitter<ProductState> emit) async {
     emit(ProductLoading());
     try {
-      final id = event.product['id'].toString(); // UUID/text uyumlu
+      final id = event.product['id'].toString();
       final data = await supabase.from('products').select().eq('id', id).maybeSingle();
 
       if (data == null) {
@@ -26,11 +26,29 @@ class ProductViewModel extends Bloc<ProductEvent, ProductState> {
         return;
       }
 
+      // Yorumları güvenli şekilde parse et
+      final rawComments = data['comments'];
+      final List<String> comments = [];
+
+      if (rawComments is List) {
+        for (var c in rawComments) {
+          if (c is String) comments.add(c);
+          else if (c is Map && c.containsKey('text')) comments.add(c['text'].toString());
+          else comments.add(c.toString());
+        }
+      } else if (rawComments is String) {
+        comments.add(rawComments);
+      }
+
       final rating = (data['rating'] ?? 0.0).toDouble();
-      final comments = List<dynamic>.from(data['comments'] ?? []);
       final isFavorite = data['is_favorite'] ?? false;
 
-      emit(ProductLoaded(product: data, rating: rating, comments: comments, isFavorite: isFavorite));
+      emit(ProductLoaded(
+        product: data,
+        rating: rating,
+        comments: comments,
+        isFavorite: isFavorite,
+      ));
     } catch (e) {
       emit(ProductError('Failed to load product: $e'));
     }
@@ -50,8 +68,7 @@ class ProductViewModel extends Bloc<ProductEvent, ProductState> {
   Future<void> _onAddComment(AddComment event, Emitter<ProductState> emit) async {
     if (state is ProductLoaded) {
       final current = state as ProductLoaded;
-      final newComments = List<dynamic>.from(current.comments)
-        ..add({'text': event.text, 'date': DateTime.now().toIso8601String()});
+      final newComments = List<String>.from(current.comments)..add(event.text);
       emit(current.copyWith(comments: newComments));
 
       try {
@@ -63,20 +80,22 @@ class ProductViewModel extends Bloc<ProductEvent, ProductState> {
   Future<void> _onEditComment(EditComment event, Emitter<ProductState> emit) async {
     if (state is ProductLoaded) {
       final current = state as ProductLoaded;
-      final newComments = List<dynamic>.from(current.comments);
-      newComments[event.index]['text'] = event.newText;
-      emit(current.copyWith(comments: newComments));
+      final newComments = List<String>.from(current.comments);
+      if (event.index >= 0 && event.index < newComments.length) {
+        newComments[event.index] = event.newText;
+        emit(current.copyWith(comments: newComments));
 
-      try {
-        await supabase.from('products').update({'comments': newComments}).eq('id', current.product['id']);
-      } catch (_) {}
+        try {
+          await supabase.from('products').update({'comments': newComments}).eq('id', current.product['id']);
+        } catch (_) {}
+      }
     }
   }
 
   Future<void> _onDeleteComment(DeleteComment event, Emitter<ProductState> emit) async {
     if (state is ProductLoaded) {
       final current = state as ProductLoaded;
-      final newComments = List<dynamic>.from(current.comments)..removeAt(event.index);
+      final newComments = List<String>.from(current.comments)..removeAt(event.index);
       emit(current.copyWith(comments: newComments));
 
       try {

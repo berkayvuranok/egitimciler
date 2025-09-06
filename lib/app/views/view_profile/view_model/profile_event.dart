@@ -1,11 +1,14 @@
 import 'package:equatable/equatable.dart';
+import 'package:image_picker/image_picker.dart';
 
 abstract class ProfileEvent extends Equatable {
   const ProfileEvent();
+
   @override
   List<Object?> get props => [];
 }
 
+// Profil yükleme
 class LoadProfile extends ProfileEvent {
   final String? userId;
   final String? email;
@@ -16,18 +19,40 @@ class LoadProfile extends ProfileEvent {
   List<Object?> get props => [userId, email];
 }
 
+// Form alanı değişiklikleri
 class ProfileFieldChanged extends ProfileEvent {
   final String? role;
   final String? gender;
   final String? educationLevel;
   final String? school;
+  final String? fullName;
 
-  const ProfileFieldChanged({this.role, this.gender, this.educationLevel, this.school});
+  const ProfileFieldChanged({
+    this.role,
+    this.gender,
+    this.educationLevel,
+    this.school,
+    this.fullName,
+  });
 
   @override
-  List<Object?> get props => [role, gender, educationLevel, school];
+  List<Object?> get props => [role, gender, educationLevel, school, fullName];
 }
 
+// Profil ve ürün kaydet
 class SaveProfile extends ProfileEvent {
-  const SaveProfile();
+  final String? lessonTitle;
+  final String? lessonDescription;
+  final String? lessonPrice;
+  final XFile? lessonImage;
+
+  const SaveProfile({
+    this.lessonTitle,
+    this.lessonDescription,
+    this.lessonPrice,
+    this.lessonImage,
+  });
+
+  @override
+  List<Object?> get props => [lessonTitle, lessonDescription, lessonPrice, lessonImage];
 }
