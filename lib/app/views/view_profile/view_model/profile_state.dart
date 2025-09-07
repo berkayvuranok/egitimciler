@@ -11,6 +11,7 @@ class ProfileState extends Equatable {
   final String lessonTitle;
   final String lessonDescription;
   final String lessonPrice;
+  final String lessonDuration; // Yeni eklenen alan
   final String lessonImageUrl;
 
   final bool isSaving;
@@ -27,6 +28,7 @@ class ProfileState extends Equatable {
     this.lessonTitle = '',
     this.lessonDescription = '',
     this.lessonPrice = '',
+    this.lessonDuration = '', // Yeni eklenen alan
     this.lessonImageUrl = '',
     this.isSaving = false,
     this.isSuccess = false,
@@ -43,6 +45,7 @@ class ProfileState extends Equatable {
     String? lessonTitle,
     String? lessonDescription,
     String? lessonPrice,
+    String? lessonDuration, // Yeni eklenen alan
     String? lessonImageUrl,
     bool? isSaving,
     bool? isSuccess,
@@ -58,6 +61,7 @@ class ProfileState extends Equatable {
       lessonTitle: lessonTitle ?? this.lessonTitle,
       lessonDescription: lessonDescription ?? this.lessonDescription,
       lessonPrice: lessonPrice ?? this.lessonPrice,
+      lessonDuration: lessonDuration ?? this.lessonDuration, // Yeni eklenen alan
       lessonImageUrl: lessonImageUrl ?? this.lessonImageUrl,
       isSaving: isSaving ?? this.isSaving,
       isSuccess: isSuccess ?? this.isSuccess,
@@ -76,6 +80,7 @@ class ProfileState extends Equatable {
         lessonTitle,
         lessonDescription,
         lessonPrice,
+        lessonDuration, // Yeni eklenen alan
         lessonImageUrl,
         isSaving,
         isSuccess,

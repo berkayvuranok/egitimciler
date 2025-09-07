@@ -131,13 +131,18 @@ class ProfileView extends StatelessWidget {
         builder: (context, state) {
           final bloc = context.read<ProfileViewModel>();
 
+          // Controller'ları state'ten başlat
           final TextEditingController lessonTitleController =
               TextEditingController(text: state.lessonTitle);
           final TextEditingController lessonDescriptionController =
               TextEditingController(text: state.lessonDescription);
           final TextEditingController lessonPriceController =
               TextEditingController(text: state.lessonPrice);
-          XFile? lessonImage;
+          final TextEditingController lessonDurationController =
+              TextEditingController(text: state.lessonDuration); // Yeni eklenen controller
+          
+          // Seçilen resmi tutmak için
+          XFile? selectedLessonImage;
 
           InputDecoration modernInput({String? hint}) {
             return InputDecoration(
@@ -189,7 +194,7 @@ class ProfileView extends StatelessWidget {
             final XFile? pickedFile =
                 await picker.pickImage(source: ImageSource.gallery);
             if (pickedFile != null) {
-              lessonImage = pickedFile;
+              selectedLessonImage = pickedFile;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text("Lesson image selected: ${pickedFile.name}"),
@@ -197,6 +202,28 @@ class ProfileView extends StatelessWidget {
                 ),
               );
             }
+          }
+
+          // Save butonuna basıldığında çağrılacak fonksiyon
+          void handleSaveProfile() {
+            // Önce form alanlarındaki değişiklikleri state'e kaydet
+            if (state.role == "Teacher") {
+              bloc.add(ProfileFieldChanged(
+                lessonTitle: lessonTitleController.text,
+                lessonDescription: lessonDescriptionController.text,
+                lessonPrice: lessonPriceController.text,
+                lessonDuration: lessonDurationController.text, // Yeni eklenen alan
+              ));
+            }
+
+            // SaveProfile event'ini gönder
+            bloc.add(SaveProfile(
+              lessonTitle: lessonTitleController.text,
+              lessonDescription: lessonDescriptionController.text,
+              lessonPrice: lessonPriceController.text,
+              lessonDuration: lessonDurationController.text, // Yeni eklenen alan
+              lessonImage: selectedLessonImage,
+            ));
           }
 
           return Scaffold(
@@ -327,6 +354,13 @@ class ProfileView extends StatelessWidget {
                       decoration: modernInput(hint: "Enter lesson price"),
                       keyboardType: TextInputType.number,
                     ),
+                    const SizedBox(height: 12),
+                    // Lesson Duration - YENİ EKLENEN ALAN
+                    TextFormField(
+                      controller: lessonDurationController,
+                      decoration: modernInput(hint: "Enter lesson duration (e.g., 60 minutes)"),
+                      keyboardType: TextInputType.text,
+                    ),
                     const SizedBox(height: 16),
                   ],
 
@@ -421,7 +455,7 @@ class ProfileView extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: state.isSaving
                           ? null
-                          : () => bloc.add(const SaveProfile()),
+                          : handleSaveProfile,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         foregroundColor: Colors.white,
@@ -509,4 +543,3 @@ class ProfileView extends StatelessWidget {
     );
   }
 }
-

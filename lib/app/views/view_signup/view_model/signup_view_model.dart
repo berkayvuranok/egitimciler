@@ -4,6 +4,8 @@ import 'signup_event.dart';
 import 'signup_state.dart';
 
 class SignUpViewModel extends Bloc<SignUpEvent, SignUpState> {
+  final supabase = Supabase.instance.client;
+
   SignUpViewModel() : super(const SignUpState()) {
     on<SignUpEmailChanged>(_onEmailChanged);
     on<SignUpPasswordChanged>(_onPasswordChanged);
@@ -37,7 +39,8 @@ class SignUpViewModel extends Bloc<SignUpEvent, SignUpState> {
     emit(state.copyWith(isSubmitting: true, errorMessage: null));
 
     try {
-      final AuthResponse response = await Supabase.instance.client.auth.signUp(
+      // 1. Auth ile kullanıcı oluştur
+      final AuthResponse response = await supabase.auth.signUp(
         email: state.email,
         password: state.password,
         data: {
@@ -46,6 +49,15 @@ class SignUpViewModel extends Bloc<SignUpEvent, SignUpState> {
       );
 
       if (response.user != null) {
+        // 2. Profiles tablosuna kullanıcı bilgilerini kaydet
+        await supabase.from('profiles').upsert({
+          'user_id': response.user!.id,
+          'email': state.email,
+          'full_name': state.fullName,
+          'created_at': DateTime.now().toIso8601String(),
+          'updated_at': DateTime.now().toIso8601String(),
+        }, onConflict: 'user_id');
+
         emit(state.copyWith(isSubmitting: false, isSuccess: true));
       } else {
         emit(state.copyWith(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:egitimciler/app/views/view_login/view_model/login_view_model.dart';
 import 'package:egitimciler/app/views/view_signup/view_model/signup_event.dart';
 import 'package:egitimciler/app/views/view_signup/view_model/signup_state.dart';
 import 'package:egitimciler/app/views/view_signup/view_model/signup_view_model.dart';
@@ -18,15 +17,14 @@ class SignUpView extends StatelessWidget {
         body: BlocConsumer<SignUpViewModel, SignUpState>(
           listener: (context, state) {
             if (state.isSuccess) {
-              // Başarılı kayıtta snackbar göster
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Row(
-                    children: [
+                    children: const [
                       Icon(Icons.check_circle, color: Colors.white, size: 20),
                       SizedBox(width: 8),
                       Text('Registration successful! Please sign in.', 
-                          style: GoogleFonts.poppins(color: Colors.white)),
+                          style: TextStyle(color: Colors.white)),
                     ],
                   ),
                   backgroundColor: Colors.green,
@@ -35,20 +33,18 @@ class SignUpView extends StatelessWidget {
                 ),
               );
               
-              // 1.5 saniye sonra login sayfasına dön
-              Future.delayed(Duration(milliseconds: 1500), () {
+              Future.delayed(const Duration(milliseconds: 1500), () {
                 Navigator.pop(context);
               });
             } else if (state.errorMessage != null) {
-              // Hata durumunda snackbar göster
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Row(
                     children: [
-                      Icon(Icons.error_outline, color: Colors.white, size: 20),
-                      SizedBox(width: 8),
+                      const Icon(Icons.error_outline, color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
                       Text(state.errorMessage!, 
-                          style: GoogleFonts.poppins(color: Colors.white)),
+                          style: const TextStyle(color: Colors.white)),
                     ],
                   ),
                   backgroundColor: Colors.red,
@@ -62,8 +58,7 @@ class SignUpView extends StatelessWidget {
             final bloc = context.read<SignUpViewModel>();
             final size = MediaQuery.of(context).size;
             
-            // Validasyon kontrolü
-            final bool isValidEmail = state.email.contains('@');
+            final bool isValidEmail = _validateEmail(state.email);
             final bool isEmailEmpty = state.email.isEmpty;
             final bool isValidPassword = _validatePassword(state.password);
             final bool isPasswordEmpty = state.password.isEmpty;
@@ -71,6 +66,9 @@ class SignUpView extends StatelessWidget {
             final bool isConfirmPasswordEmpty = state.confirmPassword.isEmpty;
             final bool isValidName = state.fullName.length >= 3;
             final bool isNameEmpty = state.fullName.isEmpty;
+
+            // Butonun aktif olması için tüm validasyonların geçerli olması gerekiyor
+            final bool isFormValid = isValidName && isValidEmail && isValidPassword && passwordsMatch;
 
             return SingleChildScrollView(
               child: Padding(
@@ -80,15 +78,13 @@ class SignUpView extends StatelessWidget {
                   children: [
                     SizedBox(height: size.height * 0.06),
                     
-                    // Back Button
                     IconButton(
                       icon: Icon(Icons.arrow_back, color: Colors.grey.shade700),
                       onPressed: () => Navigator.pop(context),
                     ),
                     
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     
-                    // Logo
                     Center(
                       child: Image.asset(
                         'assets/png/splash/splash.png',
@@ -102,7 +98,7 @@ class SignUpView extends StatelessWidget {
                               color: Colors.blue,
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Icon(Icons.school, size: 50, color: Colors.white),
+                            child: const Icon(Icons.school, size: 50, color: Colors.white),
                           );
                         },
                       ),
@@ -110,17 +106,16 @@ class SignUpView extends StatelessWidget {
                     
                     SizedBox(height: size.height * 0.03),
                     
-                    // Welcome Text
                     Text(
                       'Create Account',
                       style: GoogleFonts.poppins(
                         fontSize: 32,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                         color: Colors.black87,
                       ),
                     ),
                     
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     
                     Text(
                       'Join us to start your learning journey',
@@ -141,7 +136,7 @@ class SignUpView extends StatelessWidget {
                         color: Colors.grey.shade700,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     TextField(
                       onChanged: (value) => bloc.add(SignUpFullNameChanged(value)),
                       decoration: InputDecoration(
@@ -205,7 +200,7 @@ class SignUpView extends StatelessWidget {
                         ),
                       ),
                     
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     
                     // Email Field
                     Text(
@@ -216,7 +211,7 @@ class SignUpView extends StatelessWidget {
                         color: Colors.grey.shade700,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     TextField(
                       onChanged: (value) => bloc.add(SignUpEmailChanged(value)),
                       decoration: InputDecoration(
@@ -281,7 +276,7 @@ class SignUpView extends StatelessWidget {
                         ),
                       ),
                     
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     
                     // Password Field
                     Text(
@@ -292,7 +287,7 @@ class SignUpView extends StatelessWidget {
                         color: Colors.grey.shade700,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     TextField(
                       obscureText: true,
                       onChanged: (value) => bloc.add(SignUpPasswordChanged(value)),
@@ -349,7 +344,7 @@ class SignUpView extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
-                          'Password must be at least 10 characters long, contain uppercase, lowercase, and special characters',
+                          'Password must be at least 10 characters long, contain uppercase, lowercase, numbers and special characters',
                           style: GoogleFonts.poppins(
                             color: Colors.red,
                             fontSize: 12,
@@ -357,7 +352,7 @@ class SignUpView extends StatelessWidget {
                         ),
                       ),
                     
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     
                     // Confirm Password Field
                     Text(
@@ -368,7 +363,7 @@ class SignUpView extends StatelessWidget {
                         color: Colors.grey.shade700,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     TextField(
                       obscureText: true,
                       onChanged: (value) => bloc.add(SignUpConfirmPasswordChanged(value)),
@@ -433,26 +428,24 @@ class SignUpView extends StatelessWidget {
                         ),
                       ),
                     
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     
                     // Sign Up Button
                     SizedBox(
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: (state.isSubmitting || !isValidName || !isValidEmail || !isValidPassword || !passwordsMatch)
+                        onPressed: (state.isSubmitting || !isFormValid)
                             ? null
                             : () {
-                                if (isValidName && isValidEmail && isValidPassword && passwordsMatch) {
-                                  bloc.add(SignUpSubmitted());
-                                } else {
+                                if (!isFormValid) {
                                   String errorMessage = '';
                                   if (!isValidName) {
-                                    errorMessage = 'Please enter a valid name';
+                                    errorMessage = 'Please enter a valid name (min 3 characters)';
                                   } else if (!isValidEmail) {
-                                    errorMessage = 'Please enter a valid email address';
+                                    errorMessage = 'Please use a valid @gmail or @yahoo email address';
                                   } else if (!isValidPassword) {
-                                    errorMessage = 'Password must be at least 10 characters long, contain uppercase, lowercase, and special characters';
+                                    errorMessage = 'Password must be at least 10 characters long with uppercase, lowercase, numbers and special characters';
                                   } else if (!passwordsMatch) {
                                     errorMessage = 'Passwords do not match';
                                   }
@@ -461,12 +454,15 @@ class SignUpView extends StatelessWidget {
                                     SnackBar(
                                       content: Text(errorMessage),
                                       backgroundColor: Colors.red,
+                                      duration: const Duration(seconds: 2),
                                     ),
                                   );
+                                  return;
                                 }
+                                bloc.add(const SignUpSubmitted());
                               },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                          backgroundColor: isFormValid ? Colors.blue : Colors.grey,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -517,7 +513,7 @@ class SignUpView extends StatelessWidget {
                       ],
                     ),
                     
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     
                     // Social Sign Up Buttons
                     Row(
@@ -540,21 +536,19 @@ class SignUpView extends StatelessWidget {
                             ],
                           ),
                           child: IconButton(
-                            onPressed: () {
-                              // Google ile kayıt
-                            },
+                            onPressed: () {},
                             icon: Image.asset(
                               'assets/png/icons/google.png',
                               width: 24,
                               height: 24,
                               errorBuilder: (context, error, stackTrace) {
-                                return Icon(Icons.mail, color: Colors.red, size: 24);
+                                return const Icon(Icons.mail, color: Colors.red, size: 24);
                               },
                             ),
                           ),
                         ),
                         
-                        SizedBox(width: 16),
+                        const SizedBox(width: 16),
                         
                         // Apple
                         Container(
@@ -572,21 +566,19 @@ class SignUpView extends StatelessWidget {
                             ],
                           ),
                           child: IconButton(
-                            onPressed: () {
-                              // Apple ile kayıt
-                            },
+                            onPressed: () {},
                             icon: Image.asset(
                               'assets/icons/apple.png',
                               width: 24,
                               height: 24,
                               errorBuilder: (context, error, stackTrace) {
-                                return Icon(Icons.apple, color: Colors.white, size: 24);
+                                return const Icon(Icons.apple, color: Colors.white, size: 24);
                               },
                             ),
                           ),
                         ),
                         
-                        SizedBox(width: 16),
+                        const SizedBox(width: 16),
                         
                         // Facebook
                         Container(
@@ -604,15 +596,13 @@ class SignUpView extends StatelessWidget {
                             ],
                           ),
                           child: IconButton(
-                            onPressed: () {
-                              // Facebook ile kayıt
-                            },
+                            onPressed: () {},
                             icon: Image.asset(
                               'assets/icons/facebook.png',
                               width: 24,
                               height: 24,
                               errorBuilder: (context, error, stackTrace) {
-                                return Icon(Icons.facebook, color: Colors.white, size: 24);
+                                return const Icon(Icons.facebook, color: Colors.white, size: 24);
                               },
                             ),
                           ),
@@ -649,7 +639,7 @@ class SignUpView extends StatelessWidget {
                       ),
                     ),
                     
-                    SizedBox(height: 32),
+                    const SizedBox(height: 32),
                   ],
                 ),
               ),
@@ -658,6 +648,14 @@ class SignUpView extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  bool _validateEmail(String email) {
+    if (!email.contains('@')) return false;
+    if (!email.endsWith('@gmail.com') && !email.endsWith('@yahoo.com')) {
+      return false;
+    }
+    return true;
   }
 
   bool _validatePassword(String password) {

@@ -19,6 +19,16 @@ class SignUpState extends Equatable {
     this.errorMessage,
   });
 
+  bool get isFormValid =>
+      email.isNotEmpty &&
+      password.isNotEmpty &&
+      confirmPassword.isNotEmpty &&
+      fullName.isNotEmpty &&
+      email.contains('@') &&
+      password.length >= 10 &&
+      password == confirmPassword &&
+      fullName.length >= 3;
+
   SignUpState copyWith({
     String? email,
     String? password,
@@ -39,21 +49,14 @@ class SignUpState extends Equatable {
     );
   }
 
-  bool get isFormValid =>
-      email.isNotEmpty &&
-      password.isNotEmpty &&
-      confirmPassword.isNotEmpty &&
-      fullName.isNotEmpty &&
-      password == confirmPassword;
-
   @override
   List<Object?> get props => [
-    email,
-    password,
-    confirmPassword,
-    fullName,
-    isSubmitting,
-    isSuccess,
-    errorMessage,
-  ];
+        email,
+        password,
+        confirmPassword,
+        fullName,
+        isSubmitting,
+        isSuccess,
+        errorMessage,
+      ];
 }

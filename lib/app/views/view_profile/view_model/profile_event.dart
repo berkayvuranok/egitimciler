@@ -26,6 +26,10 @@ class ProfileFieldChanged extends ProfileEvent {
   final String? educationLevel;
   final String? school;
   final String? fullName;
+  final String? lessonTitle;
+  final String? lessonDescription;
+  final String? lessonPrice;
+  final String? lessonDuration; // Yeni eklenen alan
 
   const ProfileFieldChanged({
     this.role,
@@ -33,10 +37,24 @@ class ProfileFieldChanged extends ProfileEvent {
     this.educationLevel,
     this.school,
     this.fullName,
+    this.lessonTitle,
+    this.lessonDescription,
+    this.lessonPrice,
+    this.lessonDuration, // Yeni eklenen alan
   });
 
   @override
-  List<Object?> get props => [role, gender, educationLevel, school, fullName];
+  List<Object?> get props => [
+        role,
+        gender,
+        educationLevel,
+        school,
+        fullName,
+        lessonTitle,
+        lessonDescription,
+        lessonPrice,
+        lessonDuration, // Yeni eklenen alan
+      ];
 }
 
 // Profil ve ürün kaydet
@@ -44,15 +62,23 @@ class SaveProfile extends ProfileEvent {
   final String? lessonTitle;
   final String? lessonDescription;
   final String? lessonPrice;
+  final String? lessonDuration; // Yeni eklenen alan
   final XFile? lessonImage;
 
   const SaveProfile({
     this.lessonTitle,
     this.lessonDescription,
     this.lessonPrice,
+    this.lessonDuration, // Yeni eklenen alan
     this.lessonImage,
   });
 
   @override
-  List<Object?> get props => [lessonTitle, lessonDescription, lessonPrice, lessonImage];
+  List<Object?> get props => [
+        lessonTitle,
+        lessonDescription,
+        lessonPrice,
+        lessonDuration, // Yeni eklenen alan
+        lessonImage,
+      ];
 }

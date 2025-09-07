@@ -47,6 +47,7 @@ class ProfileViewModel extends Bloc<ProfileEvent, ProfileState> {
           lessonTitle: product['name'] ?? '',
           lessonDescription: product['description'] ?? '',
           lessonPrice: product['price']?.toString() ?? '',
+          lessonDuration: product['duration']?.toString() ?? '', // Yeni eklenen alan
           lessonImageUrl: product['image_url'] ?? '',
         ));
       }
@@ -62,6 +63,10 @@ class ProfileViewModel extends Bloc<ProfileEvent, ProfileState> {
       educationLevel: event.educationLevel ?? state.educationLevel,
       school: event.school ?? state.school,
       fullName: event.fullName ?? state.fullName,
+      lessonTitle: event.lessonTitle ?? state.lessonTitle,
+      lessonDescription: event.lessonDescription ?? state.lessonDescription,
+      lessonPrice: event.lessonPrice ?? state.lessonPrice,
+      lessonDuration: event.lessonDuration ?? state.lessonDuration, // Yeni eklenen alan
     ));
   }
 
@@ -83,11 +88,17 @@ class ProfileViewModel extends Bloc<ProfileEvent, ProfileState> {
       }
 
       // products tablosuna kaydet / güncelle
-      if (state.lessonTitle.isNotEmpty) {
+      final lessonTitle = event.lessonTitle ?? state.lessonTitle;
+      final lessonDescription = event.lessonDescription ?? state.lessonDescription;
+      final lessonPrice = event.lessonPrice ?? state.lessonPrice;
+      final lessonDuration = event.lessonDuration ?? state.lessonDuration; // Yeni eklenen alan
+
+      if (lessonTitle.isNotEmpty) {
         await supabase.from('products').upsert({
-          'name': state.lessonTitle,
-          'description': state.lessonDescription,
-          'price': state.lessonPrice,
+          'name': lessonTitle,
+          'description': lessonDescription,
+          'price': lessonPrice,
+          'duration': lessonDuration, // Yeni eklenen alan
           'image_url': lessonImageUrl ?? '',
           'instructor': state.fullName,
           'updated_at': DateTime.now().toIso8601String(),
@@ -106,7 +117,11 @@ class ProfileViewModel extends Bloc<ProfileEvent, ProfileState> {
         'updated_at': DateTime.now().toIso8601String(),
       }, onConflict: 'user_id');
 
-      emit(state.copyWith(isSaving: false, isSuccess: true));
+      emit(state.copyWith(
+        isSaving: false,
+        isSuccess: true,
+        lessonImageUrl: lessonImageUrl ?? state.lessonImageUrl,
+      ));
     } catch (e) {
       emit(state.copyWith(isSaving: false, isSuccess: false, errorMessage: e.toString()));
     }
