@@ -36,3 +36,5 @@ flutter:
     - assets/png/onboarding/onboarding2.png
     - assets/png/onboarding/onboarding3.png
     - assets/png/icons/google.png
+    - assets/.env
+
