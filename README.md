@@ -102,6 +102,17 @@ lib/
 | created_at  | timestamp         |
 | updated_at  | timestamp         |
 
+### Wishlist Table
+| Column      | Type      |
+| ----------- | --------- |
+| id          | int (PK)  |
+| user\_id    | uuid      |
+| product\_id | int       |
+| product     | json      |
+| created\_at | timestamp |
+| updated\_at | timestamp |
+
+
 ---
 
 ## 🎯 Current Flow
