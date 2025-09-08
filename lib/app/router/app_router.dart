@@ -2,7 +2,6 @@ import 'package:egitimciler/app/views/view_category/category_view.dart';
 import 'package:egitimciler/app/views/view_home/home_view.dart';
 import 'package:egitimciler/app/views/view_home/view_model/home_event.dart';
 import 'package:egitimciler/app/views/view_home/view_model/home_view_model.dart';
-
 import 'package:egitimciler/app/views/view_login/login_view.dart';
 import 'package:egitimciler/app/views/view_product_detail/product_detail.dart';
 import 'package:egitimciler/app/views/view_search/search_view.dart';
@@ -11,14 +10,15 @@ import 'package:egitimciler/app/views/view_profile/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../views/view_splash/splash_view.dart';
 import '../views/view_onboarding/onboarding_first_view.dart';
 import '../views/view_onboarding/onboarding_second_view.dart';
 import '../views/view_onboarding/onboarding_third_view.dart';
 import '../views/view_onboarding/view_model/onboarding_view_model.dart';
+import '../views/view_wishlist/wishlist_view.dart'; // wishlist import
 
 class AppRouter {
-  // SENKRON: Artık Future değil, direkt Route döndürüyor
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
       case '/':
@@ -51,7 +51,8 @@ class AppRouter {
       case '/home':
         return MaterialPageRoute(
           builder: (_) => BlocProvider(
-            create: (_) => HomeViewModel(Supabase.instance.client)..add(LoadHomeData()),
+            create: (_) =>
+                HomeViewModel(Supabase.instance.client)..add(LoadHomeData()),
             child: const HomeView(),
           ),
         );
@@ -80,10 +81,15 @@ class AppRouter {
           builder: (_) => ProductDetailView(product: product),
         );
 
+      case '/wishlist': // wishlist route eklendi
+        return MaterialPageRoute(builder: (_) => const WishlistView());
+
       default:
         return MaterialPageRoute(
           builder: (_) => const Scaffold(
-            body: Center(child: Text("Route not found")),
+            body: Center(
+              child: Text("Route not found"),
+            ),
           ),
         );
     }

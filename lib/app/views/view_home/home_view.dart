@@ -1,6 +1,9 @@
 import 'package:egitimciler/app/views/view_home/view_model/home_event.dart';
 import 'package:egitimciler/app/views/view_home/view_model/home_state.dart';
 import 'package:egitimciler/app/views/view_home/view_model/home_view_model.dart';
+import 'package:egitimciler/app/views/view_wishlist/view_model/wishlist_state.dart';
+import 'package:egitimciler/app/views/view_wishlist/view_model/wishlist_view_model.dart';
+import 'package:egitimciler/app/views/view_wishlist/view_model/wishlist_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -12,8 +15,15 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => HomeViewModel(Supabase.instance.client)..add(LoadHomeData()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => HomeViewModel(Supabase.instance.client)..add(LoadHomeData()),
+        ),
+        BlocProvider(
+          create: (_) => WishlistViewModel(Supabase.instance.client),
+        ),
+      ],
       child: const _HomeViewContent(),
     );
   }
@@ -117,45 +127,73 @@ class _HomeViewContentState extends State<_HomeViewContent> {
     return picked;
   }
 
-  Widget _buildProductItem(Map<String, dynamic> product, int index) {
+  bool _isInWishlist(List<Map<String, dynamic>> wishlist, int productId) {
+    return wishlist.any((p) => p['id'] == productId);
+  }
+
+  Widget _buildProductItem(Map<String, dynamic> product, int index, List<Map<String, dynamic>> wishlist) {
     final imageUrl = product['lesson_image'] ?? 'https://via.placeholder.com/150';
+    final inWishlist = _isInWishlist(wishlist, product['id']);
+
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, '/product_detail', arguments: product);
       },
-      child: Container(
-        width: 140,
-        margin: const EdgeInsets.only(right: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          image: DecorationImage(image: NetworkImage(imageUrl), fit: BoxFit.cover),
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: Colors.black.withAlpha(50),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                product['lesson_title'] ?? '',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white),
+      child: Stack(
+        children: [
+          Container(
+            width: 140,
+            margin: const EdgeInsets.only(right: 12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              image: DecorationImage(image: NetworkImage(imageUrl), fit: BoxFit.cover),
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.black.withAlpha(50),
               ),
-              const SizedBox(height: 4),
-              Text(
-                '${(product['lesson_price'] ?? 0).toString()} \$',
-                style: GoogleFonts.poppins(fontSize: 12, color: Colors.white),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    product['lesson_title'] ?? '',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${(product['lesson_price'] ?? 0).toString()} \$',
+                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.white),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: IconButton(
+              icon: Icon(
+                inWishlist ? Icons.favorite : Icons.favorite_border,
+                color: inWishlist ? Colors.red : Colors.white,
+              ),
+              onPressed: () {
+                final wishlistVM = context.read<WishlistViewModel>();
+                if (inWishlist) {
+                  wishlistVM.add(RemoveFromWishlist(product['id']));
+                } else {
+                  wishlistVM.add(AddToWishlist(product));
+                }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildProductSection(String title, List<Map<String, dynamic>> products) {
+  Widget _buildProductSection(String title, List<Map<String, dynamic>> products, List<Map<String, dynamic>> wishlist) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -168,7 +206,7 @@ class _HomeViewContentState extends State<_HomeViewContent> {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: products.length,
-            itemBuilder: (context, index) => _buildProductItem(products[index], index),
+            itemBuilder: (context, index) => _buildProductItem(products[index], index, wishlist),
           ),
         ),
       ],
@@ -184,7 +222,6 @@ class _HomeViewContentState extends State<_HomeViewContent> {
       type: BottomNavigationBarType.fixed,
       onTap: (index) {
         setState(() => currentIndex = index);
-
         switch (index) {
           case 0:
             break;
@@ -220,53 +257,62 @@ class _HomeViewContentState extends State<_HomeViewContent> {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<HomeViewModel, HomeState>(
-      builder: (context, state) {
-        if (state is HomeLoading) {
-          return Scaffold(
-            backgroundColor: Colors.white,
-            body: const Center(child: CircularProgressIndicator()),
-            bottomNavigationBar: _buildBottomNavBar(),
-          );
-        }
+      builder: (context, homeState) {
+        return BlocBuilder<WishlistViewModel, dynamic>(
+          builder: (context, wishlistState) {
+            List<Map<String, dynamic>> wishlistProducts = [];
+            if (wishlistState is WishlistLoaded) {
+              wishlistProducts = wishlistState.products;
+            }
 
-        if (state is HomeError) {
-          return Scaffold(
-            backgroundColor: Colors.white,
-            body: Center(child: Text(state.message)),
-            bottomNavigationBar: _buildBottomNavBar(),
-          );
-        }
+            if (homeState is HomeLoading) {
+              return Scaffold(
+                backgroundColor: Colors.white,
+                body: const Center(child: CircularProgressIndicator()),
+                bottomNavigationBar: _buildBottomNavBar(),
+              );
+            }
 
-        if (state is HomeLoaded) {
-          final products = state.products;
-          final recommended = _pickRandomProducts(products, 5);
-          final shortCourses = _pickRandomProducts(products, 5);
+            if (homeState is HomeError) {
+              return Scaffold(
+                backgroundColor: Colors.white,
+                body: Center(child: Text(homeState.message)),
+                bottomNavigationBar: _buildBottomNavBar(),
+              );
+            }
 
-          return Scaffold(
-            backgroundColor: Colors.white,
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildHeader(),
-                  _buildCategories(),
-                  const SizedBox(height: 16),
-                  _buildProductSection('Recommended for you', recommended),
-                  const SizedBox(height: 16),
-                  _buildProductSection('Short and sweet courses for you', shortCourses),
-                  const SizedBox(height: 16),
-                ],
-              ),
-            ),
-            bottomNavigationBar: _buildBottomNavBar(),
-          );
-        }
+            if (homeState is HomeLoaded) {
+              final products = homeState.products;
+              final recommended = _pickRandomProducts(products, 5);
+              final shortCourses = _pickRandomProducts(products, 5);
 
-        return Scaffold(
-          backgroundColor: Colors.white,
-          body: const Center(child: CircularProgressIndicator()),
-          bottomNavigationBar: _buildBottomNavBar(),
+              return Scaffold(
+                backgroundColor: Colors.white,
+                body: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildHeader(),
+                      _buildCategories(),
+                      const SizedBox(height: 16),
+                      _buildProductSection('Recommended for you', recommended, wishlistProducts),
+                      const SizedBox(height: 16),
+                      _buildProductSection('Short and sweet courses for you', shortCourses, wishlistProducts),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+                bottomNavigationBar: _buildBottomNavBar(),
+              );
+            }
+
+            return Scaffold(
+              backgroundColor: Colors.white,
+              body: const Center(child: CircularProgressIndicator()),
+              bottomNavigationBar: _buildBottomNavBar(),
+            );
+          },
         );
       },
     );
