@@ -1,6 +1,9 @@
 import 'package:egitimciler/app/views/view_product_detail/view_model/product_event.dart';
 import 'package:egitimciler/app/views/view_product_detail/view_model/product_state.dart';
 import 'package:egitimciler/app/views/view_product_detail/view_model/product_view_model.dart';
+import 'package:egitimciler/app/views/view_wishlist/view_model/wishlist_view_model.dart';
+import 'package:egitimciler/app/views/view_wishlist/view_model/wishlist_event.dart';
+import 'package:egitimciler/app/views/view_wishlist/view_model/wishlist_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -13,9 +16,15 @@ class ProductDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ProductViewModel(Supabase.instance.client)
-        ..add(LoadProductDetail(product)),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => ProductViewModel(Supabase.instance.client)..add(LoadProductDetail(product)),
+        ),
+        BlocProvider(
+          create: (context) => WishlistViewModel(Supabase.instance.client)..add(LoadWishlist()),
+        ),
+      ],
       child: _ProductDetailContent(product: product),
     );
   }
@@ -38,6 +47,10 @@ class _ProductDetailContentState extends State<_ProductDetailContent> {
     if (imageField is String) return imageField;
     if (imageField is List && imageField.isNotEmpty) return imageField[0];
     return 'https://via.placeholder.com/150';
+  }
+
+  bool _isInWishlist(List<Map<String, dynamic>> wishlist, int productId) {
+    return wishlist.any((p) => p['id'] == productId);
   }
 
   BottomNavigationBar _buildBottomNavBar() {
@@ -83,117 +96,136 @@ class _ProductDetailContentState extends State<_ProductDetailContent> {
   Widget build(BuildContext context) {
     return BlocBuilder<ProductViewModel, ProductState>(
       builder: (context, state) {
-        if (state is ProductLoading) {
-          return Scaffold(
-            backgroundColor: Colors.white,
-            body: const Center(child: CircularProgressIndicator()),
-            bottomNavigationBar: _buildBottomNavBar(),
-          );
-        }
+        return BlocBuilder<WishlistViewModel, dynamic>(
+          builder: (context, wishlistState) {
+            List<Map<String, dynamic>> wishlistProducts = [];
+            if (wishlistState is WishlistLoaded) {
+              wishlistProducts = wishlistState.products;
+            }
 
-        if (state is ProductError) {
-          return Scaffold(
-            backgroundColor: Colors.white,
-            body: Center(child: Text(state.message)),
-            bottomNavigationBar: _buildBottomNavBar(),
-          );
-        }
+            if (state is ProductLoading) {
+              return Scaffold(
+                backgroundColor: Colors.white,
+                body: const Center(child: CircularProgressIndicator()),
+                bottomNavigationBar: _buildBottomNavBar(),
+              );
+            }
 
-        if (state is ProductLoaded) {
-          final product = state.product;
-          final imageUrl = _getImageUrl(product['image_url']);
-          final List<String> comments = state.comments
-              .map<String>((c) => c.toString())
-              .toList(); // Supabase’den gelen string commentleri düz listeye dönüştür
-          final rating = state.rating;
+            if (state is ProductError) {
+              return Scaffold(
+                backgroundColor: Colors.white,
+                body: Center(child: Text(state.message)),
+                bottomNavigationBar: _buildBottomNavBar(),
+              );
+            }
 
-          return Scaffold(
-            backgroundColor: Colors.white,
-            appBar: AppBar(
-              title: Text(product['name'] ?? '', style: GoogleFonts.poppins()),
-              centerTitle: true,
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black87,
-              actions: [
-                IconButton(
-                  icon: Icon(state.isFavorite ? Icons.favorite : Icons.favorite_border, color: Colors.red),
-                  onPressed: () => context.read<ProductViewModel>().add(ToggleFavorite()),
+            if (state is ProductLoaded) {
+              final product = state.product;
+              final imageUrl = _getImageUrl(product['image_url']);
+              final List<String> comments = state.comments.map<String>((c) => c.toString()).toList();
+              final rating = state.rating;
+              final inWishlist = _isInWishlist(wishlistProducts, product['id']);
+
+              return Scaffold(
+                backgroundColor: Colors.white,
+                appBar: AppBar(
+                  title: Text(product['name'] ?? '', style: GoogleFonts.poppins()),
+                  centerTitle: true,
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black87,
+                  actions: [
+                    IconButton(
+                      icon: Icon(inWishlist ? Icons.favorite : Icons.favorite_border, color: Colors.red),
+                      onPressed: () {
+                        final wishlistVM = context.read<WishlistViewModel>();
+                        final user = Supabase.instance.client.auth.currentUser;
+                        if (user == null) {
+                          Navigator.pushNamed(context, '/login');
+                          return;
+                        }
+                        if (inWishlist) {
+                          wishlistVM.add(RemoveFromWishlist(product['id']));
+                        } else {
+                          wishlistVM.add(AddToWishlist(product));
+                        }
+                      },
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            bottomNavigationBar: _buildBottomNavBar(),
-            body: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 180,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      image: DecorationImage(image: NetworkImage(imageUrl), fit: BoxFit.cover),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text('Instructor: ${product['instructor']}', style: GoogleFonts.poppins(fontSize: 16)),
-                  const SizedBox(height: 4),
-                  Text('Duration: ${product['duration']}', style: GoogleFonts.poppins(fontSize: 16)),
-                  const SizedBox(height: 4),
-                  Text('Rating: ${rating.toStringAsFixed(1)} ★', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 16),
-                  Text('Comments:', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: comments.length,
-                    itemBuilder: (context, index) => ListTile(
-                      title: Text(comments[index]),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.more_vert),
-                        onPressed: () => _showCommentOptions(context, index, state, comments),
-                      ),
-                    ),
-                  ),
-                  Row(
+                bottomNavigationBar: _buildBottomNavBar(),
+                body: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: TextField(
-                          controller: commentController,
-                          decoration: const InputDecoration(hintText: 'Add a comment'),
+                      Container(
+                        height: 180,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          image: DecorationImage(image: NetworkImage(imageUrl), fit: BoxFit.cover),
                         ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.send),
-                        onPressed: () {
-                          if (commentController.text.isNotEmpty) {
-                            // Düz text olarak gönderiyoruz
-                            context.read<ProductViewModel>().add(AddComment(commentController.text));
-                            commentController.clear();
-                          }
-                        },
+                      const SizedBox(height: 16),
+                      Text('Instructor: ${product['instructor']}', style: GoogleFonts.poppins(fontSize: 16)),
+                      const SizedBox(height: 4),
+                      Text('Duration: ${product['duration']}', style: GoogleFonts.poppins(fontSize: 16)),
+                      const SizedBox(height: 4),
+                      Text('Rating: ${rating.toStringAsFixed(1)} ★', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 16),
+                      Text('Comments:', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, fontSize: 16)),
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: comments.length,
+                        itemBuilder: (context, index) => ListTile(
+                          title: Text(comments[index]),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.more_vert),
+                            onPressed: () => _showCommentOptions(context, index, state, comments),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: commentController,
+                              decoration: const InputDecoration(hintText: 'Add a comment'),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.send),
+                            onPressed: () {
+                              if (commentController.text.isNotEmpty) {
+                                context.read<ProductViewModel>().add(AddComment(commentController.text));
+                                commentController.clear();
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      Text('Update Rating:', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+                      Row(
+                        children: List.generate(5, (index) {
+                          return IconButton(
+                            icon: Icon(index < rating.round() ? Icons.star : Icons.star_border, color: Colors.amber),
+                            onPressed: () => context.read<ProductViewModel>().add(UpdateRating(index + 1.0)),
+                          );
+                        }),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  Text('Update Rating:', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-                  Row(
-                    children: List.generate(5, (index) {
-                      return IconButton(
-                        icon: Icon(index < rating.round() ? Icons.star : Icons.star_border, color: Colors.amber),
-                        onPressed: () => context.read<ProductViewModel>().add(UpdateRating(index + 1.0)),
-                      );
-                    }),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
+                ),
+              );
+            }
 
-        return Scaffold(
-          backgroundColor: Colors.white,
-          body: const Center(child: CircularProgressIndicator()),
-          bottomNavigationBar: _buildBottomNavBar(),
+            return Scaffold(
+              backgroundColor: Colors.white,
+              body: const Center(child: CircularProgressIndicator()),
+              bottomNavigationBar: _buildBottomNavBar(),
+            );
+          },
         );
       },
     );
