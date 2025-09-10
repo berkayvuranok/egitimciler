@@ -125,24 +125,6 @@ lib/
 
 ---
 
-## ✅ Roadmap (Next Steps)
-
-- [ ] Add **Wishlist** functionality.  
-- [ ] Implement **My Learning** section.  
-- [ ] Support **Lesson Categories** on Home.  
-- [ ] Enable **Lesson Enrollment / Purchase** flow.  
-- [ ] Add **Profile Picture Upload**.  
-- [ ] Localization (TR/EN).  
-
----
-
-## 🖼️ Screenshots (To Add Later)
-- Profile Page  
-- Home Page  
-- Lesson Creation  
-- Search Page  
-
----
 
 ## 📌 Installation & Run
 
