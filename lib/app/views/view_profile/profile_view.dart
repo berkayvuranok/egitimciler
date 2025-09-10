@@ -139,10 +139,7 @@ class ProfileView extends StatelessWidget {
           final TextEditingController lessonPriceController =
               TextEditingController(text: state.lessonPrice);
           final TextEditingController lessonDurationController =
-              TextEditingController(text: state.lessonDuration); // Yeni eklenen controller
-          
-          // Seçilen resmi tutmak için
-          XFile? selectedLessonImage;
+              TextEditingController(text: state.lessonDuration);
 
           InputDecoration modernInput({String? hint}) {
             return InputDecoration(
@@ -194,7 +191,7 @@ class ProfileView extends StatelessWidget {
             final XFile? pickedFile =
                 await picker.pickImage(source: ImageSource.gallery);
             if (pickedFile != null) {
-              selectedLessonImage = pickedFile;
+              bloc.add(ProfileFieldChanged(lessonImage: pickedFile));
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text("Lesson image selected: ${pickedFile.name}"),
@@ -204,25 +201,22 @@ class ProfileView extends StatelessWidget {
             }
           }
 
-          // Save butonuna basıldığında çağrılacak fonksiyon
           void handleSaveProfile() {
-            // Önce form alanlarındaki değişiklikleri state'e kaydet
             if (state.role == "Teacher") {
               bloc.add(ProfileFieldChanged(
                 lessonTitle: lessonTitleController.text,
                 lessonDescription: lessonDescriptionController.text,
                 lessonPrice: lessonPriceController.text,
-                lessonDuration: lessonDurationController.text, // Yeni eklenen alan
+                lessonDuration: lessonDurationController.text,
               ));
             }
 
-            // SaveProfile event'ini gönder
             bloc.add(SaveProfile(
               lessonTitle: lessonTitleController.text,
               lessonDescription: lessonDescriptionController.text,
               lessonPrice: lessonPriceController.text,
-              lessonDuration: lessonDurationController.text, // Yeni eklenen alan
-              lessonImage: selectedLessonImage,
+              lessonDuration: lessonDurationController.text,
+              lessonImage: state.lessonImage,
             ));
           }
 
@@ -355,7 +349,7 @@ class ProfileView extends StatelessWidget {
                       keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 12),
-                    // Lesson Duration - YENİ EKLENEN ALAN
+                    // Lesson Duration
                     TextFormField(
                       controller: lessonDurationController,
                       decoration: modernInput(hint: "Enter lesson duration (e.g., 60 minutes)"),

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileState extends Equatable {
   final String fullName;
@@ -11,8 +12,9 @@ class ProfileState extends Equatable {
   final String lessonTitle;
   final String lessonDescription;
   final String lessonPrice;
-  final String lessonDuration; // Yeni eklenen alan
+  final String lessonDuration;
   final String lessonImageUrl;
+  final XFile? lessonImage;
 
   final bool isSaving;
   final bool isSuccess;
@@ -28,8 +30,9 @@ class ProfileState extends Equatable {
     this.lessonTitle = '',
     this.lessonDescription = '',
     this.lessonPrice = '',
-    this.lessonDuration = '', // Yeni eklenen alan
+    this.lessonDuration = '',
     this.lessonImageUrl = '',
+    this.lessonImage,
     this.isSaving = false,
     this.isSuccess = false,
     this.errorMessage,
@@ -45,8 +48,9 @@ class ProfileState extends Equatable {
     String? lessonTitle,
     String? lessonDescription,
     String? lessonPrice,
-    String? lessonDuration, // Yeni eklenen alan
+    String? lessonDuration,
     String? lessonImageUrl,
+    XFile? lessonImage,
     bool? isSaving,
     bool? isSuccess,
     String? errorMessage,
@@ -61,8 +65,9 @@ class ProfileState extends Equatable {
       lessonTitle: lessonTitle ?? this.lessonTitle,
       lessonDescription: lessonDescription ?? this.lessonDescription,
       lessonPrice: lessonPrice ?? this.lessonPrice,
-      lessonDuration: lessonDuration ?? this.lessonDuration, // Yeni eklenen alan
+      lessonDuration: lessonDuration ?? this.lessonDuration,
       lessonImageUrl: lessonImageUrl ?? this.lessonImageUrl,
+      lessonImage: lessonImage ?? this.lessonImage,
       isSaving: isSaving ?? this.isSaving,
       isSuccess: isSuccess ?? this.isSuccess,
       errorMessage: errorMessage ?? this.errorMessage,
@@ -80,8 +85,9 @@ class ProfileState extends Equatable {
         lessonTitle,
         lessonDescription,
         lessonPrice,
-        lessonDuration, // Yeni eklenen alan
+        lessonDuration,
         lessonImageUrl,
+        lessonImage,
         isSaving,
         isSuccess,
         errorMessage,

@@ -29,7 +29,8 @@ class ProfileFieldChanged extends ProfileEvent {
   final String? lessonTitle;
   final String? lessonDescription;
   final String? lessonPrice;
-  final String? lessonDuration; // Yeni eklenen alan
+  final String? lessonDuration;
+  final XFile? lessonImage;
 
   const ProfileFieldChanged({
     this.role,
@@ -40,7 +41,8 @@ class ProfileFieldChanged extends ProfileEvent {
     this.lessonTitle,
     this.lessonDescription,
     this.lessonPrice,
-    this.lessonDuration, // Yeni eklenen alan
+    this.lessonDuration,
+    this.lessonImage,
   });
 
   @override
@@ -53,7 +55,8 @@ class ProfileFieldChanged extends ProfileEvent {
         lessonTitle,
         lessonDescription,
         lessonPrice,
-        lessonDuration, // Yeni eklenen alan
+        lessonDuration,
+        lessonImage,
       ];
 }
 
@@ -62,14 +65,14 @@ class SaveProfile extends ProfileEvent {
   final String? lessonTitle;
   final String? lessonDescription;
   final String? lessonPrice;
-  final String? lessonDuration; // Yeni eklenen alan
+  final String? lessonDuration;
   final XFile? lessonImage;
 
   const SaveProfile({
     this.lessonTitle,
     this.lessonDescription,
     this.lessonPrice,
-    this.lessonDuration, // Yeni eklenen alan
+    this.lessonDuration,
     this.lessonImage,
   });
 
@@ -78,7 +81,7 @@ class SaveProfile extends ProfileEvent {
         lessonTitle,
         lessonDescription,
         lessonPrice,
-        lessonDuration, // Yeni eklenen alan
+        lessonDuration,
         lessonImage,
       ];
 }
