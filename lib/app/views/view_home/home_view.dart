@@ -132,8 +132,14 @@ class _HomeViewContentState extends State<_HomeViewContent> {
   }
 
   Widget _buildProductItem(Map<String, dynamic> product, int index, List<Map<String, dynamic>> wishlist) {
-    final imageUrl = product['lesson_image'] ?? 'https://via.placeholder.com/150';
+    // DÜZELTME: Doğru image URL alanını kullan
+    final imageUrl = product['image_url'] ?? 
+                    product['lesson_image'] ?? 
+                    'https://via.placeholder.com/150';
+    
     final inWishlist = _isInWishlist(wishlist, product['id']);
+    final productName = product['name'] ?? product['lesson_title'] ?? 'No Title';
+    final productPrice = product['price'] ?? product['lesson_price'] ?? 0;
 
     return GestureDetector(
       onTap: () {
@@ -146,46 +152,101 @@ class _HomeViewContentState extends State<_HomeViewContent> {
             margin: const EdgeInsets.only(right: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              image: DecorationImage(image: NetworkImage(imageUrl), fit: BoxFit.cover),
+              color: Colors.grey[300], // Arka plan rengi
             ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                width: 140,
+                height: 180,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    color: Colors.grey[300],
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          // Gradient overlay ve metinler
+          Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                color: Colors.black.withAlpha(50),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withAlpha(200), // withOpacity yerine withAlpha
+                  ],
+                ),
               ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    product['lesson_title'] ?? '',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: Colors.white),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      productName,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontWeight: FontWeight.bold, 
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${(product['lesson_price'] ?? 0).toString()} \$',
-                    style: GoogleFonts.poppins(fontSize: 12, color: Colors.white),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Text(
+                      '${productPrice.toString()} \$',
+                      style: GoogleFonts.poppins(
+                        fontSize: 12, 
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
           ),
+          // Wishlist butonu
           Positioned(
             top: 4,
             right: 4,
-            child: IconButton(
-              icon: Icon(
-                inWishlist ? Icons.favorite : Icons.favorite_border,
-                color: inWishlist ? Colors.red : Colors.white,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(20),
               ),
-              onPressed: () {
-                final wishlistVM = context.read<WishlistViewModel>();
-                if (inWishlist) {
-                  wishlistVM.add(RemoveFromWishlist(product['id']));
-                } else {
-                  wishlistVM.add(AddToWishlist(product));
-                }
-              },
+              child: IconButton(
+                icon: Icon(
+                  inWishlist ? Icons.favorite : Icons.favorite_border,
+                  color: inWishlist ? Colors.red : Colors.white,
+                  size: 20,
+                ),
+                onPressed: () {
+                  final wishlistVM = context.read<WishlistViewModel>();
+                  if (inWishlist) {
+                    wishlistVM.add(RemoveFromWishlist(product['id']));
+                  } else {
+                    wishlistVM.add(AddToWishlist(product));
+                  }
+                },
+              ),
             ),
           ),
         ],
@@ -194,12 +255,22 @@ class _HomeViewContentState extends State<_HomeViewContent> {
   }
 
   Widget _buildProductSection(String title, List<Map<String, dynamic>> products, List<Map<String, dynamic>> wishlist) {
+    if (products.isEmpty) {
+      return const SizedBox(); // Boşsa hiçbir şey gösterme
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Text(title, style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold)),
+          child: Text(
+            title, 
+            style: GoogleFonts.poppins(
+              fontSize: 18, 
+              fontWeight: FontWeight.bold
+            )
+          ),
         ),
         SizedBox(
           height: 180,

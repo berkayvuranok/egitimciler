@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import 'profile_event.dart';
 import 'profile_state.dart';
 
@@ -18,6 +19,7 @@ class ProfileViewModel extends Bloc<ProfileEvent, ProfileState> {
       final userId = event.userId;
       if (userId == null) return;
 
+      // Profil verisini çek
       final profileResponse = await supabase
           .from('profiles')
           .select()
@@ -35,24 +37,26 @@ class ProfileViewModel extends Bloc<ProfileEvent, ProfileState> {
         ));
       }
 
-      // Seller/Teacher ise ürün bilgilerini yükle
-      final product = await supabase
-          .from('products')
-          .select()
-          .eq('instructor', profileResponse?['full_name'])
-          .maybeSingle();
+      // Ürün/lesson verisini çek (sadece fullName varsa)
+      if (profileResponse?['full_name'] != null) {
+        final product = await supabase
+            .from('products')
+            .select()
+            .eq('instructor', profileResponse!['full_name'])
+            .maybeSingle();
 
-      if (product != null) {
-        emit(state.copyWith(
-          lessonTitle: product['name'] ?? '',
-          lessonDescription: product['description'] ?? '',
-          lessonPrice: product['price']?.toString() ?? '',
-          lessonDuration: product['duration']?.toString() ?? '', // Yeni eklenen alan
-          lessonImageUrl: product['image_url'] ?? '',
-        ));
+        if (product != null) {
+          emit(state.copyWith(
+            lessonTitle: product['name'] ?? '',
+            lessonDescription: product['description'] ?? '',
+            lessonPrice: product['price']?.toString() ?? '',
+            lessonDuration: product['duration']?.toString() ?? '',
+            lessonImageUrl: product['image_url'] ?? '',
+          ));
+        }
       }
     } catch (e) {
-      emit(state.copyWith(errorMessage: e.toString()));
+      emit(state.copyWith(errorMessage: "Profil yüklenirken hata: ${e.toString()}"));
     }
   }
 
@@ -66,7 +70,8 @@ class ProfileViewModel extends Bloc<ProfileEvent, ProfileState> {
       lessonTitle: event.lessonTitle ?? state.lessonTitle,
       lessonDescription: event.lessonDescription ?? state.lessonDescription,
       lessonPrice: event.lessonPrice ?? state.lessonPrice,
-      lessonDuration: event.lessonDuration ?? state.lessonDuration, // Yeni eklenen alan
+      lessonDuration: event.lessonDuration ?? state.lessonDuration,
+      lessonImage: event.lessonImage ?? state.lessonImage,
     ));
   }
 
@@ -75,37 +80,61 @@ class ProfileViewModel extends Bloc<ProfileEvent, ProfileState> {
 
     try {
       final user = supabase.auth.currentUser;
-      if (user == null) throw Exception("User not logged in");
+      if (user == null) throw Exception("Kullanıcı giriş yapmamış");
 
       String? lessonImageUrl = state.lessonImageUrl;
+      final XFile? imageToUpload = event.lessonImage ?? state.lessonImage;
 
-      // Ürün görseli seçildiyse Storage'a yükle
-      if (event.lessonImage != null) {
-        final fileBytes = await event.lessonImage!.readAsBytes();
-        final fileName = "products/${user.id}_${DateTime.now().millisecondsSinceEpoch}.png";
-        await supabase.storage.from('products').uploadBinary(fileName, fileBytes);
-        lessonImageUrl = supabase.storage.from('products').getPublicUrl(fileName);
+      // Eğer görsel seçildiyse Storage'a yükle
+      if (imageToUpload != null) {
+        final fileBytes = await File(imageToUpload.path).readAsBytes();
+        final ext = imageToUpload.name.split('.').last;
+        
+        // DÜZELTME: Klasör yapısını düzgün oluştur
+        final fileName = "${user.id}/${DateTime.now().millisecondsSinceEpoch}.$ext";
+
+        try {
+          await supabase.storage
+              .from('images')
+              .uploadBinary(fileName, fileBytes, fileOptions: FileOptions(contentType: 'image/$ext'));
+
+          final publicUrl = supabase.storage.from('images').getPublicUrl(fileName);
+          lessonImageUrl = publicUrl;
+        } catch (storageError) {
+          // Storage hatasını yakala ve kullanıcıya bildir
+          emit(state.copyWith(
+            isSaving: false,
+            isSuccess: false,
+            errorMessage: "Resim yüklenirken hata: $storageError\n"
+                "Lütfen Supabase Storage politikalarını kontrol edin."
+          ));
+          return;
+        }
       }
 
-      // products tablosuna kaydet / güncelle
       final lessonTitle = event.lessonTitle ?? state.lessonTitle;
       final lessonDescription = event.lessonDescription ?? state.lessonDescription;
       final lessonPrice = event.lessonPrice ?? state.lessonPrice;
-      final lessonDuration = event.lessonDuration ?? state.lessonDuration; // Yeni eklenen alan
+      final lessonDuration = event.lessonDuration ?? state.lessonDuration;
+
+      // Fiyatı sayıya çevir (boşsa null yap)
+      double? parsedPrice;
+      if (lessonPrice.isNotEmpty) {
+        parsedPrice = double.tryParse(lessonPrice);
+      }
 
       if (lessonTitle.isNotEmpty) {
         await supabase.from('products').upsert({
           'name': lessonTitle,
           'description': lessonDescription,
-          'price': lessonPrice,
-          'duration': lessonDuration, // Yeni eklenen alan
+          'price': parsedPrice,
+          'duration': lessonDuration,
           'image_url': lessonImageUrl ?? '',
           'instructor': state.fullName,
           'updated_at': DateTime.now().toIso8601String(),
         }, onConflict: 'instructor');
       }
 
-      // profiles tablosuna kaydet / güncelle
       await supabase.from('profiles').upsert({
         'user_id': user.id,
         'full_name': state.fullName,
@@ -121,9 +150,14 @@ class ProfileViewModel extends Bloc<ProfileEvent, ProfileState> {
         isSaving: false,
         isSuccess: true,
         lessonImageUrl: lessonImageUrl ?? state.lessonImageUrl,
+        lessonImage: null, // Yüklendikten sonra temizle
       ));
     } catch (e) {
-      emit(state.copyWith(isSaving: false, isSuccess: false, errorMessage: e.toString()));
+      emit(state.copyWith(
+        isSaving: false, 
+        isSuccess: false, 
+        errorMessage: "Profil kaydedilirken hata: ${e.toString()}"
+      ));
     }
   }
 }
