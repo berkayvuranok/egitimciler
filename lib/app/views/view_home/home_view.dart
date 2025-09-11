@@ -7,7 +7,6 @@ import 'package:egitimciler/app/views/view_wishlist/view_model/wishlist_event.da
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:math';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeView extends StatelessWidget {
@@ -110,33 +109,12 @@ class _HomeViewContentState extends State<_HomeViewContent> {
     );
   }
 
-  List<Map<String, dynamic>> _pickRandomProducts(List<Map<String, dynamic>> allProducts, int count) {
-    if (allProducts.isEmpty) return [];
-    if (allProducts.length <= count) return allProducts;
-
-    final random = Random();
-    final picked = <Map<String, dynamic>>[];
-    final tempList = List<Map<String, dynamic>>.from(allProducts);
-
-    for (int i = 0; i < count; i++) {
-      if (tempList.isEmpty) break;
-      int index = random.nextInt(tempList.length);
-      picked.add(tempList[index]);
-      tempList.removeAt(index);
-    }
-    return picked;
-  }
-
   bool _isInWishlist(List<Map<String, dynamic>> wishlist, int productId) {
     return wishlist.any((p) => p['id'] == productId);
   }
 
   Widget _buildProductItem(Map<String, dynamic> product, int index, List<Map<String, dynamic>> wishlist) {
-    // DÜZELTME: Doğru image URL alanını kullan
-    final imageUrl = product['image_url'] ?? 
-                    product['lesson_image'] ?? 
-                    'https://via.placeholder.com/150';
-    
+    final imageUrl = product['image_url'] ?? product['lesson_image'] ?? 'https://via.placeholder.com/150';
     final inWishlist = _isInWishlist(wishlist, product['id']);
     final productName = product['name'] ?? product['lesson_title'] ?? 'No Title';
     final productPrice = product['price'] ?? product['lesson_price'] ?? 0;
@@ -152,7 +130,7 @@ class _HomeViewContentState extends State<_HomeViewContent> {
             margin: const EdgeInsets.only(right: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: Colors.grey[300], // Arka plan rengi
+              color: Colors.grey[300],
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
@@ -177,7 +155,6 @@ class _HomeViewContentState extends State<_HomeViewContent> {
               ),
             ),
           ),
-          // Gradient overlay ve metinler
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -187,7 +164,7 @@ class _HomeViewContentState extends State<_HomeViewContent> {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withAlpha(200), // withOpacity yerine withAlpha
+                    Colors.black.withAlpha(200),
                   ],
                 ),
               ),
@@ -200,7 +177,7 @@ class _HomeViewContentState extends State<_HomeViewContent> {
                       productName,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.bold, 
+                        fontWeight: FontWeight.bold,
                         color: Colors.white,
                         fontSize: 12,
                       ),
@@ -213,7 +190,7 @@ class _HomeViewContentState extends State<_HomeViewContent> {
                     child: Text(
                       '${productPrice.toString()} \$',
                       style: GoogleFonts.poppins(
-                        fontSize: 12, 
+                        fontSize: 12,
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
@@ -223,7 +200,6 @@ class _HomeViewContentState extends State<_HomeViewContent> {
               ),
             ),
           ),
-          // Wishlist butonu
           Positioned(
             top: 4,
             right: 4,
@@ -255,9 +231,7 @@ class _HomeViewContentState extends State<_HomeViewContent> {
   }
 
   Widget _buildProductSection(String title, List<Map<String, dynamic>> products, List<Map<String, dynamic>> wishlist) {
-    if (products.isEmpty) {
-      return const SizedBox(); // Boşsa hiçbir şey gösterme
-    }
+    if (products.isEmpty) return const SizedBox(); // Boşsa hiçbir şey gösterme
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,11 +239,8 @@ class _HomeViewContentState extends State<_HomeViewContent> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Text(
-            title, 
-            style: GoogleFonts.poppins(
-              fontSize: 18, 
-              fontWeight: FontWeight.bold
-            )
+            title,
+            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
         SizedBox(
@@ -354,8 +325,6 @@ class _HomeViewContentState extends State<_HomeViewContent> {
 
             if (homeState is HomeLoaded) {
               final products = homeState.products;
-              final recommended = _pickRandomProducts(products, 5);
-              final shortCourses = _pickRandomProducts(products, 5);
 
               return Scaffold(
                 backgroundColor: Colors.white,
@@ -367,10 +336,11 @@ class _HomeViewContentState extends State<_HomeViewContent> {
                       _buildHeader(),
                       _buildCategories(),
                       const SizedBox(height: 16),
-                      _buildProductSection('Recommended for you', recommended, wishlistProducts),
+                      if (products.isNotEmpty)
+                        _buildProductSection('Recommended for you', products, wishlistProducts),
                       const SizedBox(height: 16),
-                      _buildProductSection('Short and sweet courses for you', shortCourses, wishlistProducts),
-                      const SizedBox(height: 16),
+                      if (products.isNotEmpty)
+                        _buildProductSection('Short and sweet courses for you', products, wishlistProducts),
                     ],
                   ),
                 ),
