@@ -20,7 +20,7 @@ class HomeViewModel extends Bloc<HomeEvent, HomeState> {
       // products tablosundan gerekli alanları çekiyoruz
       final data = await supabase
           .from('products')
-          .select('id, name, description, image_url, rating, duration, instructor, category')
+          .select('id, name, price, description, image_url, rating, duration, instructor, category')
           .order('updated_at', ascending: false);
 
       emit(HomeLoaded(List<Map<String, dynamic>>.from(data)));
