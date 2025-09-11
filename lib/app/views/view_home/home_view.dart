@@ -21,7 +21,8 @@ class HomeView extends StatelessWidget {
               HomeViewModel(Supabase.instance.client)..add(LoadHomeData()),
         ),
         BlocProvider(
-          create: (_) => WishlistViewModel(Supabase.instance.client),
+          create: (_) => WishlistViewModel(Supabase.instance.client)
+            ..add(LoadWishlist()),
         ),
       ],
       child: const _HomeViewContent(),
@@ -122,16 +123,9 @@ class _HomeViewContentState extends State<_HomeViewContent> {
       Map<String, dynamic> product,
       List<Map<String, dynamic>> wishlist,
       ) {
-    // Görsel
     final imageUrl = product['image_url'] ?? 'https://via.placeholder.com/150';
-
-    // Wishlist durumu
     final inWishlist = _isInWishlist(wishlist, product['id']);
-
-    // Ürün adı
     final productName = product['name'] ?? 'No Title';
-
-    // Fiyat - sadece price alanını kullanıyoruz
     final productPrice = product['price'] ?? 0;
 
     return GestureDetector(
@@ -205,26 +199,35 @@ class _HomeViewContentState extends State<_HomeViewContent> {
           Positioned(
             top: 4,
             right: 4,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: IconButton(
-                icon: Icon(
-                  inWishlist ? Icons.favorite : Icons.favorite_border,
-                  color: inWishlist ? Colors.red : Colors.white,
-                  size: 20,
-                ),
-                onPressed: () {
-                  final wishlistVM = context.read<WishlistViewModel>();
-                  if (inWishlist) {
-                    wishlistVM.add(RemoveFromWishlist(product['id']));
-                  } else {
-                    wishlistVM.add(AddToWishlist(product));
-                  }
-                },
-              ),
+            child: BlocBuilder<WishlistViewModel, WishlistState>(
+              builder: (context, wishlistState) {
+                List<Map<String, dynamic>> wishlistProducts = [];
+                if (wishlistState is WishlistLoaded) {
+                  wishlistProducts = wishlistState.products;
+                }
+                final isFavorite = _isInWishlist(wishlistProducts, product['id']);
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : Colors.white,
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      final wishlistVM = context.read<WishlistViewModel>();
+                      if (isFavorite) {
+                        wishlistVM.add(RemoveFromWishlist(product['id']));
+                      } else {
+                        wishlistVM.add(AddToWishlist(product));
+                      }
+                    },
+                  ),
+                );
+              },
             ),
           ),
         ],
@@ -308,35 +311,26 @@ class _HomeViewContentState extends State<_HomeViewContent> {
   Widget build(BuildContext context) {
     return BlocBuilder<HomeViewModel, HomeState>(
       builder: (context, homeState) {
-        return BlocBuilder<WishlistViewModel, dynamic>(
-          builder: (context, wishlistState) {
-            List<Map<String, dynamic>> wishlistProducts = [];
-            if (wishlistState is WishlistLoaded) {
-              wishlistProducts = wishlistState.products;
-            }
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: BlocBuilder<WishlistViewModel, WishlistState>(
+            builder: (context, wishlistState) {
+              List<Map<String, dynamic>> wishlistProducts = [];
+              if (wishlistState is WishlistLoaded) {
+                wishlistProducts = wishlistState.products;
+              }
 
-            if (homeState is HomeLoading) {
-              return Scaffold(
-                backgroundColor: Colors.white,
-                body: const Center(child: CircularProgressIndicator()),
-                bottomNavigationBar: _buildBottomNavBar(),
-              );
-            }
+              if (homeState is HomeLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-            if (homeState is HomeError) {
-              return Scaffold(
-                backgroundColor: Colors.white,
-                body: Center(child: Text(homeState.message)),
-                bottomNavigationBar: _buildBottomNavBar(),
-              );
-            }
+              if (homeState is HomeError) {
+                return Center(child: Text(homeState.message));
+              }
 
-            if (homeState is HomeLoaded) {
-              final products = homeState.products;
-
-              return Scaffold(
-                backgroundColor: Colors.white,
-                body: SingleChildScrollView(
+              if (homeState is HomeLoaded) {
+                final products = homeState.products;
+                return SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,17 +349,13 @@ class _HomeViewContentState extends State<_HomeViewContent> {
                             wishlistProducts),
                     ],
                   ),
-                ),
-                bottomNavigationBar: _buildBottomNavBar(),
-              );
-            }
+                );
+              }
 
-            return Scaffold(
-              backgroundColor: Colors.white,
-              body: const Center(child: CircularProgressIndicator()),
-              bottomNavigationBar: _buildBottomNavBar(),
-            );
-          },
+              return const Center(child: CircularProgressIndicator());
+            },
+          ),
+          bottomNavigationBar: _buildBottomNavBar(),
         );
       },
     );
