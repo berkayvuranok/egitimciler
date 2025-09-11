@@ -33,7 +33,14 @@ class _SearchViewContentState extends State<_SearchViewContent> {
   void _handleBottomNavTap(int index) {
     if (index == 0) {
       Navigator.pushNamed(context, '/home');
-    } else if (index == 4) {
+    } else if (index == 1) {
+      // Zaten Search ekranındayız
+    } else if (index == 2) {
+      Navigator.pushNamed(context, '/my_learning');
+    } else if (index == 3) {
+      Navigator.pushNamed(context, '/wishlist');
+    }
+    else if (index == 4) {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) {
         Navigator.pushNamed(context, '/login');
