@@ -15,6 +15,7 @@ import '../views/view_onboarding/onboarding_first_view.dart';
 import '../views/view_onboarding/onboarding_second_view.dart';
 import '../views/view_onboarding/onboarding_third_view.dart';
 import '../views/view_onboarding/view_model/onboarding_view_model.dart';
+import '../views/view_my_learning/my_learning_view.dart'; // ✅ MyLearning import
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -47,7 +48,6 @@ class AppRouter {
         );
 
       case '/home':
-        // HomeView kendi içinde MultiBlocProvider içeriyor, burada tekrar eklemeye gerek yok
         return MaterialPageRoute(builder: (_) => const HomeView());
 
       case '/search':
@@ -76,6 +76,9 @@ class AppRouter {
 
       case '/wishlist':
         return MaterialPageRoute(builder: (_) => const WishlistView());
+
+      case '/my_learning': // ✅ My Learning route eklendi
+        return MaterialPageRoute(builder: (_) => const MyLearningView());
 
       default:
         return MaterialPageRoute(
