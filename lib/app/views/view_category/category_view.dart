@@ -1,3 +1,4 @@
+// category_view.dart
 import 'package:egitimciler/app/views/view_category/view_model/category_event.dart';
 import 'package:egitimciler/app/views/view_category/view_model/category_state.dart';
 import 'package:egitimciler/app/views/view_category/view_model/category_viewmodel.dart';
@@ -7,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-
 class CategoryView extends StatelessWidget {
   final String category;
   const CategoryView({super.key, required this.category});
@@ -15,14 +15,23 @@ class CategoryView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => CategoryViewModel(Supabase.instance.client)..add(LoadCategoryProducts(category)),
-      child: const _CategoryViewContent(),
+      create: (_) =>
+          CategoryViewModel(Supabase.instance.client)..add(LoadCategoryProducts(category)),
+      child: _CategoryViewContent(category: category),
     );
   }
 }
 
-class _CategoryViewContent extends StatelessWidget {
-  const _CategoryViewContent();
+class _CategoryViewContent extends StatefulWidget {
+  final String category;
+  const _CategoryViewContent({required this.category});
+
+  @override
+  State<_CategoryViewContent> createState() => _CategoryViewContentState();
+}
+
+class _CategoryViewContentState extends State<_CategoryViewContent> {
+  int currentIndex = 0;
 
   String _getImageUrl(dynamic imageField) {
     if (imageField == null) return 'https://via.placeholder.com/150';
@@ -31,28 +40,91 @@ class _CategoryViewContent extends StatelessWidget {
     return 'https://via.placeholder.com/150';
   }
 
+  BottomNavigationBar _buildBottomNavBar() {
+    return BottomNavigationBar(
+      backgroundColor: Colors.white,
+      selectedItemColor: Colors.blue,
+      unselectedItemColor: Colors.black54,
+      currentIndex: currentIndex,
+      type: BottomNavigationBarType.fixed,
+      onTap: (index) {
+        setState(() => currentIndex = index);
+        switch (index) {
+          case 0:
+            Navigator.pushNamed(context, '/home');
+            break;
+          case 1:
+            Navigator.pushNamed(context, '/search');
+            break;
+          case 2:
+            Navigator.pushNamed(context, '/my_learning');
+            break;
+          case 3:
+            Navigator.pushNamed(context, '/wishlist');
+            break;
+          case 4:
+            final user = Supabase.instance.client.auth.currentUser;
+            if (user != null) Navigator.pushNamed(context, '/profile');
+            else Navigator.pushNamed(context, '/login');
+            break;
+        }
+      },
+      items: const [
+        BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Featured'),
+        BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+        BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'My Learning'),
+        BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'WishList'),
+        BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Account'),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CategoryViewModel, CategoryState>(
       builder: (context, state) {
         if (state is CategoryLoading) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: const Center(child: CircularProgressIndicator()),
+            bottomNavigationBar: _buildBottomNavBar(),
+          );
         }
+
         if (state is CategoryError) {
-          return Scaffold(body: Center(child: Text(state.message)));
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(child: Text(state.message)),
+            bottomNavigationBar: _buildBottomNavBar(),
+          );
         }
+
         if (state is CategoryLoaded) {
           final products = state.products;
+
           if (products.isEmpty) {
-            return const Scaffold(body: Center(child: Text('No products found.')));
+            return Scaffold(
+              backgroundColor: Colors.white,
+              appBar: AppBar(
+                title: Text(widget.category, style: GoogleFonts.poppins()),
+                centerTitle: true,
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black87,
+              ),
+              body: const Center(child: Text('No products found.')),
+              bottomNavigationBar: _buildBottomNavBar(),
+            );
           }
+
           return Scaffold(
+            backgroundColor: Colors.white,
             appBar: AppBar(
-              title: Text(products.first['category'] ?? '', style: GoogleFonts.poppins()),
+              title: Text(widget.category, style: GoogleFonts.poppins()),
               centerTitle: true,
               backgroundColor: Colors.white,
               foregroundColor: Colors.black87,
             ),
+            bottomNavigationBar: _buildBottomNavBar(),
             body: ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: products.length,
@@ -62,16 +134,28 @@ class _CategoryViewContent extends StatelessWidget {
                 return GestureDetector(
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => ProductDetailView(product: product)),
+                    MaterialPageRoute(
+                      builder: (_) => ProductDetailView(product: product),
+                    ),
                   ),
                   child: Card(
                     margin: const EdgeInsets.only(bottom: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: Row(
                       children: [
                         ClipRRect(
-                          borderRadius: const BorderRadius.only(topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)),
-                          child: Image.network(imageUrl, width: 100, height: 100, fit: BoxFit.cover),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            bottomLeft: Radius.circular(12),
+                          ),
+                          child: Image.network(
+                            imageUrl,
+                            width: 100,
+                            height: 100,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                         Expanded(
                           child: Padding(
@@ -79,14 +163,36 @@ class _CategoryViewContent extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(product['name'] ?? '', style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+                                Text(
+                                  product['name'] ?? '',
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                                 const SizedBox(height: 4),
-                                Row(children: List.generate(5, (i) {
-                                  final rating = (product['rating'] ?? 0.0).toDouble().round();
-                                  return Icon(i < rating ? Icons.star : Icons.star_border, size: 14, color: Colors.amber);
-                                })),
+                                Row(
+                                  children: List.generate(5, (i) {
+                                    final rating = (product['rating'] ?? 0.0).toDouble().round();
+                                    return Icon(
+                                      i < rating ? Icons.star : Icons.star_border,
+                                      size: 14,
+                                      color: Colors.amber,
+                                    );
+                                  }),
+                                ),
                                 const SizedBox(height: 4),
-                                Text('Instructor: ${product['instructor']}', style: GoogleFonts.poppins(fontSize: 12)),
+                                Text(
+                                  'Instructor: ${product['instructor'] ?? ''}',
+                                  style: GoogleFonts.poppins(fontSize: 12),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${product['price'] ?? ''} ₺',
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.green[700],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -99,7 +205,12 @@ class _CategoryViewContent extends StatelessWidget {
             ),
           );
         }
-        return const SizedBox();
+
+        return Scaffold(
+          backgroundColor: Colors.white,
+          body: const Center(child: CircularProgressIndicator()),
+          bottomNavigationBar: _buildBottomNavBar(),
+        );
       },
     );
   }

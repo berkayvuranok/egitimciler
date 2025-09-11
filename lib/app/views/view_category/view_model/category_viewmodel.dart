@@ -5,27 +5,29 @@ import 'category_state.dart';
 
 class CategoryViewModel extends Bloc<CategoryEvent, CategoryState> {
   final SupabaseClient supabase;
-
   CategoryViewModel(this.supabase) : super(CategoryLoading()) {
     on<LoadCategoryProducts>(_onLoadCategoryProducts);
   }
 
-  Future<void> _onLoadCategoryProducts(LoadCategoryProducts event, Emitter<CategoryState> emit) async {
+  Future<void> _onLoadCategoryProducts(
+      LoadCategoryProducts event, Emitter<CategoryState> emit) async {
     emit(CategoryLoading());
     try {
-      final response = await supabase
-          .from('products')
-          .select()
-          .eq('category', event.category)
-          .order('created_at', ascending: false);
+      final query = supabase.from('products').select();
 
-      if (response != null) {
-        emit(CategoryLoaded(List<Map<String, dynamic>>.from(response)));
-      } else {
-        emit(CategoryLoaded([]));
-      }
+      final response = event.category == 'All'
+          ? await query
+          : await query.eq('category', event.category);
+
+      final products = List<Map<String, dynamic>>.from(response);
+
+      // Debug için → konsolda görürsün
+      print("Category: ${event.category}");
+      print("Fetched products: $products");
+
+      emit(CategoryLoaded(products));
     } catch (e) {
-      emit(CategoryError('Failed to load products: $e'));
+      emit(CategoryError(e.toString()));
     }
   }
 }
