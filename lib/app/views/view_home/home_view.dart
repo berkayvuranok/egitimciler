@@ -17,7 +17,8 @@ class HomeView extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => HomeViewModel(Supabase.instance.client)..add(LoadHomeData()),
+          create: (_) =>
+              HomeViewModel(Supabase.instance.client)..add(LoadHomeData()),
         ),
         BlocProvider(
           create: (_) => WishlistViewModel(Supabase.instance.client),
@@ -66,7 +67,11 @@ class _HomeViewContentState extends State<_HomeViewContent> {
     return Padding(
       padding: const EdgeInsets.only(top: 32, bottom: 16),
       child: Center(
-        child: Image.asset('assets/png/splash/splash.png', width: 120, height: 120),
+        child: Image.asset(
+          'assets/png/splash/splash.png',
+          width: 120,
+          height: 120,
+        ),
       ),
     );
   }
@@ -113,11 +118,21 @@ class _HomeViewContentState extends State<_HomeViewContent> {
     return wishlist.any((p) => p['id'] == productId);
   }
 
-  Widget _buildProductItem(Map<String, dynamic> product, int index, List<Map<String, dynamic>> wishlist) {
-    final imageUrl = product['image_url'] ?? product['lesson_image'] ?? 'https://via.placeholder.com/150';
+  Widget _buildProductItem(
+      Map<String, dynamic> product,
+      List<Map<String, dynamic>> wishlist,
+      ) {
+    // Görsel
+    final imageUrl = product['image_url'] ?? 'https://via.placeholder.com/150';
+
+    // Wishlist durumu
     final inWishlist = _isInWishlist(wishlist, product['id']);
-    final productName = product['name'] ?? product['lesson_title'] ?? 'No Title';
-    final productPrice = product['price'] ?? product['lesson_price'] ?? 0;
+
+    // Ürün adı
+    final productName = product['name'] ?? 'No Title';
+
+    // Fiyat - sadece price alanını kullanıyoruz
+    final productPrice = product['price'] ?? 0;
 
     return GestureDetector(
       onTap: () {
@@ -139,19 +154,6 @@ class _HomeViewContentState extends State<_HomeViewContent> {
                 fit: BoxFit.cover,
                 width: 140,
                 height: 180,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Container(
-                    color: Colors.grey[300],
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                            : null,
-                      ),
-                    ),
-                  );
-                },
               ),
             ),
           ),
@@ -188,7 +190,7 @@ class _HomeViewContentState extends State<_HomeViewContent> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
                     child: Text(
-                      '${productPrice.toString()} \$',
+                      '$productPrice ₺',
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Colors.white,
@@ -230,8 +232,12 @@ class _HomeViewContentState extends State<_HomeViewContent> {
     );
   }
 
-  Widget _buildProductSection(String title, List<Map<String, dynamic>> products, List<Map<String, dynamic>> wishlist) {
-    if (products.isEmpty) return const SizedBox(); // Boşsa hiçbir şey gösterme
+  Widget _buildProductSection(
+      String title,
+      List<Map<String, dynamic>> products,
+      List<Map<String, dynamic>> wishlist,
+      ) {
+    if (products.isEmpty) return const SizedBox();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,7 +246,8 @@ class _HomeViewContentState extends State<_HomeViewContent> {
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Text(
             title,
-            style: GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
+            style:
+                GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ),
         SizedBox(
@@ -248,7 +255,8 @@ class _HomeViewContentState extends State<_HomeViewContent> {
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: products.length,
-            itemBuilder: (context, index) => _buildProductItem(products[index], index, wishlist),
+            itemBuilder: (context, index) =>
+                _buildProductItem(products[index], wishlist),
           ),
         ),
       ],
@@ -337,10 +345,14 @@ class _HomeViewContentState extends State<_HomeViewContent> {
                       _buildCategories(),
                       const SizedBox(height: 16),
                       if (products.isNotEmpty)
-                        _buildProductSection('Recommended for you', products, wishlistProducts),
+                        _buildProductSection(
+                            'Recommended for you', products, wishlistProducts),
                       const SizedBox(height: 16),
                       if (products.isNotEmpty)
-                        _buildProductSection('Short and sweet courses for you', products, wishlistProducts),
+                        _buildProductSection(
+                            'Short and sweet courses for you',
+                            products,
+                            wishlistProducts),
                     ],
                   ),
                 ),
