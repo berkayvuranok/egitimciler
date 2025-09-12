@@ -1,9 +1,13 @@
+import 'package:egitimciler/app/app_provider/locale_cubit.dart';
 import 'package:egitimciler/app/router/app_router.dart';
 import 'package:egitimciler/app/views/view_onboarding/view_model/onboarding_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:egitimciler/app/l10n/app_localizations.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,9 +22,13 @@ Future<void> main() async {
   );
 
   runApp(
-    // Root seviyede OnboardingViewModel provider
-    BlocProvider(
-      create: (_) => OnboardingViewModel(),
+    MultiBlocProvider(
+      providers: [
+        // Root seviyede OnboardingViewModel provider
+        BlocProvider(create: (_) => OnboardingViewModel()),
+        // Root seviyede LocaleCubit provider
+        BlocProvider(create: (_) => LocaleCubit()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -31,16 +39,28 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Egitimciler',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
-      // Route yönetimi AppRouter üzerinden yapılacak
-      onGenerateRoute: AppRouter.generateRoute,
-      initialRoute: '/',
+    return BlocBuilder<LocaleCubit, Locale>(
+      builder: (context, locale) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Egitimciler',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+            useMaterial3: true,
+          ),
+          // Locale ve localization desteği
+          locale: locale,
+          supportedLocales: const [Locale('en'), Locale('tr')],
+          localizationsDelegates: const [
+            AppLocalizationsDelegate(),
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          onGenerateRoute: AppRouter.generateRoute,
+          initialRoute: '/',
+        );
+      },
     );
   }
 }
