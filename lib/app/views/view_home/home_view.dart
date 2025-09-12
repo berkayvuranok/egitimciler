@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:egitimciler/app/l10n/app_localizations.dart';
+import '../../app_provider/locale_cubit.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -40,18 +42,7 @@ class _HomeViewContent extends StatefulWidget {
 class _HomeViewContentState extends State<_HomeViewContent> {
   int currentIndex = 0;
 
-  final List<String> categories = [
-    'All',
-    'Highschool Education',
-    'Middle School Education',
-    'Development',
-    'Design',
-    'Business',
-    'Music',
-    'Photography',
-    'Marketing'
-  ];
-
+  late List<String> categories;
   final List<Color> categoryColors = [
     Colors.blue,
     Colors.orange,
@@ -63,6 +54,27 @@ class _HomeViewContentState extends State<_HomeViewContent> {
     Colors.indigo,
     Colors.yellow
   ];
+
+  void _updateCategories(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    categories = [
+      loc.all,
+      loc.highschoolEducation,
+      loc.middleSchoolEducation,
+      loc.development,
+      loc.design,
+      loc.business,
+      loc.music,
+      loc.photography,
+      loc.marketing
+    ];
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateCategories(context);
+  }
 
   Widget _buildHeader() {
     return Padding(
@@ -78,40 +90,45 @@ class _HomeViewContentState extends State<_HomeViewContent> {
   }
 
   Widget _buildCategories() {
-    return SizedBox(
-      height: 60,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/category_products',
-                arguments: categories[index],
-              );
-            },
-            child: Container(
-              margin: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: categoryColors[index],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Center(
-                child: Text(
-                  categories[index],
-                  style: GoogleFonts.poppins(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+    return BlocBuilder<LocaleCubit, Locale>(
+      builder: (context, locale) {
+        _updateCategories(context);
+        return SizedBox(
+          height: 60,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/category_products',
+                    arguments: categories[index],
+                  );
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(left: 12, top: 8, bottom: 8),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: categoryColors[index],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(
+                      categories[index],
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          );
-        },
-      ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 
@@ -124,7 +141,6 @@ class _HomeViewContentState extends State<_HomeViewContent> {
       List<Map<String, dynamic>> wishlist,
       ) {
     final imageUrl = product['image_url'] ?? 'https://via.placeholder.com/150';
-    final inWishlist = _isInWishlist(wishlist, product['id']);
     final productName = product['name'] ?? 'No Title';
     final productPrice = product['price'] ?? 0;
 
@@ -266,44 +282,87 @@ class _HomeViewContentState extends State<_HomeViewContent> {
     );
   }
 
-  BottomNavigationBar _buildBottomNavBar() {
-    return BottomNavigationBar(
-      backgroundColor: Colors.white,
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.black54,
-      currentIndex: currentIndex,
-      type: BottomNavigationBarType.fixed,
-      onTap: (index) {
-        setState(() => currentIndex = index);
-        switch (index) {
-          case 0:
-            break;
-          case 1:
-            Navigator.pushNamed(context, '/search');
-            break;
-          case 2:
-            Navigator.pushNamed(context, '/my_learning');
-            break;
-          case 3:
-            Navigator.pushNamed(context, '/wishlist');
-            break;
-          case 4:
-            final user = Supabase.instance.client.auth.currentUser;
-            if (user != null) {
-              Navigator.pushNamed(context, '/profile');
-            } else {
-              Navigator.pushNamed(context, '/login');
+  Widget _buildLanguageSwitcher() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: BlocBuilder<LocaleCubit, Locale>(
+          builder: (context, locale) {
+            return DropdownButton<String>(
+              value: locale.languageCode,
+              underline: const SizedBox(),
+              icon: const Icon(Icons.language, size: 18),
+              items: const [
+                DropdownMenuItem(
+                  value: 'en',
+                  child: Text('English', style: TextStyle(fontSize: 12)),
+                ),
+                DropdownMenuItem(
+                  value: 'tr',
+                  child: Text('Türkçe', style: TextStyle(fontSize: 12)),
+                ),
+              ],
+              onChanged: (value) {
+                if (value != null && value != locale.languageCode) {
+                  context.read<LocaleCubit>().changeLocale(Locale(value));
+                }
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  BlocBuilder<LocaleCubit, Locale> _buildBottomNavBar() {
+    return BlocBuilder<LocaleCubit, Locale>(
+      builder: (context, locale) {
+        final loc = AppLocalizations.of(context);
+        return BottomNavigationBar(
+          backgroundColor: Colors.white,
+          selectedItemColor: Colors.blue,
+          unselectedItemColor: Colors.black54,
+          currentIndex: currentIndex,
+          type: BottomNavigationBarType.fixed,
+          onTap: (index) {
+            setState(() => currentIndex = index);
+            switch (index) {
+              case 0:
+                break;
+              case 1:
+                Navigator.pushNamed(context, '/search');
+                break;
+              case 2:
+                Navigator.pushNamed(context, '/my_learning');
+                break;
+              case 3:
+                Navigator.pushNamed(context, '/wishlist');
+                break;
+              case 4:
+                final user = Supabase.instance.client.auth.currentUser;
+                if (user != null) {
+                  Navigator.pushNamed(context, '/profile');
+                } else {
+                  Navigator.pushNamed(context, '/login');
+                }
+                break;
             }
-            break;
-        }
+          },
+          items: [
+            BottomNavigationBarItem(icon: const Icon(Icons.star), label: loc.featured),
+            BottomNavigationBarItem(icon: const Icon(Icons.search), label: loc.search),
+            BottomNavigationBarItem(icon: const Icon(Icons.menu_book), label: loc.myLearning),
+            BottomNavigationBarItem(icon: const Icon(Icons.favorite), label: loc.wishlist),
+            BottomNavigationBarItem(icon: const Icon(Icons.account_circle), label: loc.account),
+          ],
+        );
       },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Featured'),
-        BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-        BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'My Learning'),
-        BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'WishList'),
-        BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Account'),
-      ],
     );
   }
 
@@ -340,13 +399,16 @@ class _HomeViewContentState extends State<_HomeViewContent> {
                       const SizedBox(height: 16),
                       if (products.isNotEmpty)
                         _buildProductSection(
-                            'Recommended for you', products, wishlistProducts),
+                            AppLocalizations.of(context).recommended,
+                            products,
+                            wishlistProducts),
                       const SizedBox(height: 16),
                       if (products.isNotEmpty)
                         _buildProductSection(
-                            'Short and sweet courses for you',
+                            AppLocalizations.of(context).shortCourses,
                             products,
                             wishlistProducts),
+                      _buildLanguageSwitcher(),
                     ],
                   ),
                 );

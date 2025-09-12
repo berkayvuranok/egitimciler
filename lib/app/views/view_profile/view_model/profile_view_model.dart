@@ -129,7 +129,7 @@ class ProfileViewModel extends Bloc<ProfileEvent, ProfileState> {
           'description': lessonDescription,
           'price': parsedPrice,
           'duration': lessonDuration,
-          'image_url': lessonImageUrl ?? '',
+          'image_url': lessonImageUrl,
           'instructor': state.fullName,
           'updated_at': DateTime.now().toIso8601String(),
         }, onConflict: 'instructor');
@@ -149,7 +149,7 @@ class ProfileViewModel extends Bloc<ProfileEvent, ProfileState> {
       emit(state.copyWith(
         isSaving: false,
         isSuccess: true,
-        lessonImageUrl: lessonImageUrl ?? state.lessonImageUrl,
+        lessonImageUrl: lessonImageUrl,
         lessonImage: null, // Yüklendikten sonra temizle
       ));
     } catch (e) {

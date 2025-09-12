@@ -1,3 +1,4 @@
+// my_learning_view.dart
 import 'package:egitimciler/app/views/view_product_detail/product_detail.dart';
 import 'package:egitimciler/app/views/view_my_learning/view_model/my_learning_event.dart';
 import 'package:egitimciler/app/views/view_my_learning/view_model/my_learning_state.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:egitimciler/app/l10n/app_localizations.dart';
 
 class MyLearningView extends StatefulWidget {
   const MyLearningView({super.key});
@@ -17,7 +19,8 @@ class MyLearningView extends StatefulWidget {
 class _MyLearningViewState extends State<MyLearningView> {
   int currentIndex = 2; // Başlangıçta My Learning seçili
 
-  BottomNavigationBar _buildBottomNavBar() {
+  BottomNavigationBar _buildBottomNavBar(AppLocalizations local) {
+    final user = Supabase.instance.client.auth.currentUser;
     return BottomNavigationBar(
       backgroundColor: Colors.white,
       selectedItemColor: Colors.blue,
@@ -40,24 +43,28 @@ class _MyLearningViewState extends State<MyLearningView> {
             Navigator.pushNamed(context, '/wishlist');
             break;
           case 4:
-            final user = Supabase.instance.client.auth.currentUser;
-            if (user != null) Navigator.pushNamed(context, '/profile');
-            else Navigator.pushNamed(context, '/login');
+            if (user != null) {
+              Navigator.pushNamed(context, '/profile');
+            } else {
+              Navigator.pushNamed(context, '/login');
+            }
             break;
         }
       },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Featured'),
-        BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-        BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'My Learning'),
-        BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'WishList'),
-        BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Account'),
+      items: [
+        BottomNavigationBarItem(icon: const Icon(Icons.star), label: local.featured),
+        BottomNavigationBarItem(icon: const Icon(Icons.search), label: local.search),
+        BottomNavigationBarItem(icon: const Icon(Icons.menu_book), label: local.myLearning),
+        BottomNavigationBarItem(icon: const Icon(Icons.favorite), label: local.wishlist),
+        BottomNavigationBarItem(icon: const Icon(Icons.account_circle), label: local.account),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final local = AppLocalizations.of(context);
+
     return BlocProvider(
       create: (_) =>
           MyLearningViewModel(Supabase.instance.client)..add(LoadMyCourses()),
@@ -73,13 +80,14 @@ class _MyLearningViewState extends State<MyLearningView> {
             final courses = state.courses;
 
             if (courses.isEmpty) {
-              bodyContent = const Center(child: Text('You have no courses yet.'));
+              bodyContent = Center(child: Text(local.noResultsFound)); // Lokalize edildi
             } else {
               bodyContent = ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: courses.length,
                 itemBuilder: (context, index) {
                   final product = courses[index];
+                  final imageUrl = product['image_url'] ?? 'https://via.placeholder.com/150';
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -94,18 +102,17 @@ class _MyLearningViewState extends State<MyLearningView> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                       child: ListTile(
-                        leading: product['image_url'] != null
-                            ? Image.network(
-                                product['image_url'],
-                                width: 60,
-                                height: 60,
-                                fit: BoxFit.cover,
-                              )
-                            : const SizedBox(width: 60, height: 60),
-                        title: Text(product['name'], style: GoogleFonts.poppins()),
+                        leading: Image.network(
+                          imageUrl,
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                        ),
+                        title: Text(product['name'] ?? '', style: GoogleFonts.poppins()),
                         subtitle: Text(
-                            'Instructor: ${product['instructor'] ?? '-'}',
-                            style: GoogleFonts.poppins(fontSize: 12)),
+                          local.instructorLabel(product['instructor'] ?? '-'),
+                          style: GoogleFonts.poppins(fontSize: 12),
+                        ),
                       ),
                     ),
                   );
@@ -117,9 +124,9 @@ class _MyLearningViewState extends State<MyLearningView> {
           }
 
           return Scaffold(
-            backgroundColor: Colors.white, // Top ve bottom harici beyaz
+            backgroundColor: Colors.white,
             appBar: AppBar(
-              title: const Text('My Learning'),
+              title: Text(local.myLearning),
               centerTitle: true,
               backgroundColor: Colors.white,
               foregroundColor: Colors.black87,
@@ -133,7 +140,7 @@ class _MyLearningViewState extends State<MyLearningView> {
                 },
               ),
             ),
-            bottomNavigationBar: _buildBottomNavBar(),
+            bottomNavigationBar: _buildBottomNavBar(local),
             body: bodyContent,
           );
         },

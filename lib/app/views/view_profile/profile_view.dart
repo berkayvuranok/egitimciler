@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'dart:io';
+import 'package:egitimciler/app/l10n/app_localizations.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -82,6 +82,7 @@ class ProfileView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentUser = Supabase.instance.client.auth.currentUser;
+    final l10n = AppLocalizations.of(context);
 
     return BlocProvider(
       create: (_) => ProfileViewModel()
@@ -92,12 +93,12 @@ class ProfileView extends StatelessWidget {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Row(
-                  children: const [
-                    Icon(Icons.check_circle, color: Colors.white, size: 20),
-                    SizedBox(width: 8),
+                  children: [
+                    const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                    const SizedBox(width: 8),
                     Text(
-                      "Profile saved successfully",
-                      style: TextStyle(color: Colors.white),
+                      l10n.profileSavedSuccessfully,
+                      style: const TextStyle(color: Colors.white),
                     ),
                   ],
                 ),
@@ -130,6 +131,7 @@ class ProfileView extends StatelessWidget {
         },
         builder: (context, state) {
           final bloc = context.read<ProfileViewModel>();
+          final l10n = AppLocalizations.of(context);
 
           // Controller'ları state'ten başlat
           final TextEditingController lessonTitleController =
@@ -194,7 +196,7 @@ class ProfileView extends StatelessWidget {
               bloc.add(ProfileFieldChanged(lessonImage: pickedFile));
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text("Lesson image selected: ${pickedFile.name}"),
+                  content: Text(l10n.lessonImageSelected(pickedFile.name)),
                   backgroundColor: Colors.blue,
                 ),
               );
@@ -224,7 +226,7 @@ class ProfileView extends StatelessWidget {
             backgroundColor: Colors.white,
             appBar: AppBar(
               title: Text(
-                "Profile",
+                l10n.profile,
                 style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
               ),
               backgroundColor: Colors.blue,
@@ -233,7 +235,7 @@ class ProfileView extends StatelessWidget {
               actions: [
                 IconButton(
                   icon: const Icon(Icons.logout),
-                  tooltip: "Logout",
+                  tooltip: l10n.logout,
                   onPressed: () => handleLogout(context),
                 ),
               ],
@@ -245,7 +247,7 @@ class ProfileView extends StatelessWidget {
                 children: [
                   // Full name
                   Text(
-                    "Full Name",
+                    l10n.fullName,
                     style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 8),
@@ -261,7 +263,7 @@ class ProfileView extends StatelessWidget {
 
                   // Email
                   Text(
-                    "Email",
+                    l10n.email,
                     style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 8),
@@ -277,7 +279,7 @@ class ProfileView extends StatelessWidget {
 
                   // Role
                   Text(
-                    "Role",
+                    l10n.role,
                     style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 8),
@@ -285,8 +287,7 @@ class ProfileView extends StatelessWidget {
                     value: state.role.isNotEmpty ? state.role : null,
                     items: const ["Teacher", "Student"]
                         .map(
-                          (role) =>
-                              DropdownMenuItem(value: role, child: Text(role)),
+                          (role) => DropdownMenuItem(value: role, child: Text(role == "Teacher" ? l10n.teacher : l10n.student)),
                         )
                         .toList(),
                     onChanged: (value) =>
@@ -299,7 +300,7 @@ class ProfileView extends StatelessWidget {
                   // Teacher-only section: Private Lesson
                   if (state.role == "Teacher") ...[
                     Text(
-                      "Open a Private Lesson",
+                      l10n.openPrivateLesson,
                       style: GoogleFonts.poppins(
                           fontWeight: FontWeight.w600, fontSize: 16),
                     ),
@@ -312,7 +313,7 @@ class ProfileView extends StatelessWidget {
                         onPressed: () => pickLessonImage(context),
                         icon: const Icon(Icons.photo),
                         label: Text(
-                          "Select Lesson Image",
+                          l10n.selectLessonImage,
                           style: GoogleFonts.poppins(
                               fontWeight: FontWeight.w600, fontSize: 16),
                         ),
@@ -330,29 +331,27 @@ class ProfileView extends StatelessWidget {
                     // Lesson Title
                     TextFormField(
                       controller: lessonTitleController,
-                      decoration:
-                          modernInput(hint: "Enter lesson title"),
+                      decoration: modernInput(hint: l10n.enterLessonTitle),
                     ),
                     const SizedBox(height: 12),
                     // Lesson Description
                     TextFormField(
                       controller: lessonDescriptionController,
-                      decoration:
-                          modernInput(hint: "Enter lesson description"),
+                      decoration: modernInput(hint: l10n.enterLessonDescription),
                       maxLines: 3,
                     ),
                     const SizedBox(height: 12),
                     // Lesson Price
                     TextFormField(
                       controller: lessonPriceController,
-                      decoration: modernInput(hint: "Enter lesson price"),
+                      decoration: modernInput(hint: l10n.enterLessonPrice),
                       keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 12),
                     // Lesson Duration
                     TextFormField(
                       controller: lessonDurationController,
-                      decoration: modernInput(hint: "Enter lesson duration (e.g., 60 minutes)"),
+                      decoration: modernInput(hint: l10n.enterLessonDuration),
                       keyboardType: TextInputType.text,
                     ),
                     const SizedBox(height: 16),
@@ -360,14 +359,14 @@ class ProfileView extends StatelessWidget {
 
                   // Gender
                   Text(
-                    "Gender",
+                    l10n.gender,
                     style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: state.gender.isNotEmpty ? state.gender : null,
                     items: const ["Male", "Female"]
-                        .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                        .map((g) => DropdownMenuItem(value: g, child: Text(g == "Male" ? l10n.male : l10n.female)))
                         .toList(),
                     onChanged: (value) =>
                         bloc.add(ProfileFieldChanged(gender: value)),
@@ -378,7 +377,7 @@ class ProfileView extends StatelessWidget {
 
                   // Education Level
                   Text(
-                    "Education Level",
+                    l10n.educationLevel,
                     style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 8),
@@ -396,7 +395,13 @@ class ProfileView extends StatelessWidget {
                         .map(
                           (edu) => DropdownMenuItem(
                             value: edu,
-                            child: Text(edu),
+                            child: Text(
+                              edu == "Middle School" ? l10n.middleSchool :
+                              edu == "High School" ? l10n.highSchool :
+                              edu == "University" ? l10n.university :
+                              edu == "Master" ? l10n.master :
+                              l10n.phd
+                            ),
                           ),
                         )
                         .toList(),
@@ -409,7 +414,7 @@ class ProfileView extends StatelessWidget {
 
                   // School (Autocomplete)
                   Text(
-                    "School",
+                    l10n.school,
                     style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 8),
@@ -436,7 +441,7 @@ class ProfileView extends StatelessWidget {
                         onEditingComplete: onEditingComplete,
                         onChanged: (val) =>
                             bloc.add(ProfileFieldChanged(school: val)),
-                        decoration: modernInput(hint: "Enter your school"),
+                        decoration: modernInput(hint: l10n.enterYourSchool),
                       );
                     },
                   ),
@@ -469,7 +474,7 @@ class ProfileView extends StatelessWidget {
                               ),
                             )
                           : Text(
-                              "Save Profile",
+                              l10n.saveProfile,
                               style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
@@ -504,14 +509,14 @@ class ProfileView extends StatelessWidget {
                   // Already in Account/Profile
                   break;
               }
-            }),
+            }, l10n),
           );
         },
       ),
     );
   }
 
-  BottomNavigationBar buildBottomNavBar(int currentIndex, Function(int) onTap) {
+  BottomNavigationBar buildBottomNavBar(int currentIndex, Function(int) onTap, AppLocalizations l10n) {
     return BottomNavigationBar(
       backgroundColor: Colors.white,
       selectedItemColor: Colors.blue,
@@ -521,17 +526,17 @@ class ProfileView extends StatelessWidget {
       selectedLabelStyle: GoogleFonts.poppins(),
       unselectedLabelStyle: GoogleFonts.poppins(),
       onTap: (index) => onTap(index),
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Featured'),
-        BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+      items: [
+        BottomNavigationBarItem(icon: const Icon(Icons.star), label: l10n.featured),
+        BottomNavigationBarItem(icon: const Icon(Icons.search), label: l10n.search),
         BottomNavigationBarItem(
-          icon: Icon(Icons.menu_book),
-          label: 'My Learning',
+          icon: const Icon(Icons.menu_book),
+          label: l10n.myLearning,
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'WishList'),
+        BottomNavigationBarItem(icon: const Icon(Icons.favorite), label: l10n.wishlist),
         BottomNavigationBarItem(
-          icon: Icon(Icons.account_circle),
-          label: 'Account',
+          icon: const Icon(Icons.account_circle),
+          label: l10n.account,
         ),
       ],
     );

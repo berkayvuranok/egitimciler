@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:egitimciler/app/l10n/app_localizations.dart';
 
 class CategoryView extends StatelessWidget {
   final String category;
@@ -40,7 +41,7 @@ class _CategoryViewContentState extends State<_CategoryViewContent> {
     return 'https://via.placeholder.com/150';
   }
 
-  BottomNavigationBar _buildBottomNavBar() {
+  BottomNavigationBar _buildBottomNavBar(AppLocalizations local) {
     return BottomNavigationBar(
       backgroundColor: Colors.white,
       selectedItemColor: Colors.blue,
@@ -64,30 +65,35 @@ class _CategoryViewContentState extends State<_CategoryViewContent> {
             break;
           case 4:
             final user = Supabase.instance.client.auth.currentUser;
-            if (user != null) Navigator.pushNamed(context, '/profile');
-            else Navigator.pushNamed(context, '/login');
+            if (user != null) {
+              Navigator.pushNamed(context, '/profile');
+            } else {
+              Navigator.pushNamed(context, '/login');
+            }
             break;
         }
       },
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Featured'),
-        BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-        BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'My Learning'),
-        BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'WishList'),
-        BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Account'),
+      items: [
+        BottomNavigationBarItem(icon: const Icon(Icons.star), label: local.featured),
+        BottomNavigationBarItem(icon: const Icon(Icons.search), label: local.search),
+        BottomNavigationBarItem(icon: const Icon(Icons.menu_book), label: local.myLearning),
+        BottomNavigationBarItem(icon: const Icon(Icons.favorite), label: local.wishlist),
+        BottomNavigationBarItem(icon: const Icon(Icons.account_circle), label: local.account),
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final local = AppLocalizations.of(context);
+
     return BlocBuilder<CategoryViewModel, CategoryState>(
       builder: (context, state) {
         if (state is CategoryLoading) {
           return Scaffold(
             backgroundColor: Colors.white,
             body: const Center(child: CircularProgressIndicator()),
-            bottomNavigationBar: _buildBottomNavBar(),
+            bottomNavigationBar: _buildBottomNavBar(local),
           );
         }
 
@@ -95,7 +101,7 @@ class _CategoryViewContentState extends State<_CategoryViewContent> {
           return Scaffold(
             backgroundColor: Colors.white,
             body: Center(child: Text(state.message)),
-            bottomNavigationBar: _buildBottomNavBar(),
+            bottomNavigationBar: _buildBottomNavBar(local),
           );
         }
 
@@ -111,8 +117,8 @@ class _CategoryViewContentState extends State<_CategoryViewContent> {
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.black87,
               ),
-              body: const Center(child: Text('No products found.')),
-              bottomNavigationBar: _buildBottomNavBar(),
+              body: Center(child: Text(local.noProductsFound)),
+              bottomNavigationBar: _buildBottomNavBar(local),
             );
           }
 
@@ -124,7 +130,7 @@ class _CategoryViewContentState extends State<_CategoryViewContent> {
               backgroundColor: Colors.white,
               foregroundColor: Colors.black87,
             ),
-            bottomNavigationBar: _buildBottomNavBar(),
+            bottomNavigationBar: _buildBottomNavBar(local),
             body: ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: products.length,
@@ -182,7 +188,7 @@ class _CategoryViewContentState extends State<_CategoryViewContent> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  'Instructor: ${product['instructor'] ?? ''}',
+                                  local.instructorLabel(product['instructor'] ?? ''),
                                   style: GoogleFonts.poppins(fontSize: 12),
                                 ),
                                 const SizedBox(height: 4),
@@ -209,7 +215,7 @@ class _CategoryViewContentState extends State<_CategoryViewContent> {
         return Scaffold(
           backgroundColor: Colors.white,
           body: const Center(child: CircularProgressIndicator()),
-          bottomNavigationBar: _buildBottomNavBar(),
+          bottomNavigationBar: _buildBottomNavBar(local),
         );
       },
     );
