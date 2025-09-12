@@ -20,7 +20,9 @@ dependencies:
   sign_in_with_apple: ^6.0.0
   google_sign_in: ^6.1.0
   image_picker: ^0.8.7+4
-   # Güncel sürüm, Android ve iOS uyumlu
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
@@ -38,3 +40,5 @@ flutter:
     - assets/png/icons/google.png
     - assets/.env
 
+  # Localization
+  generate: true

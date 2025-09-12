@@ -8,7 +8,7 @@ import 'package:egitimciler/app/views/view_profile/profile_view.dart';
 import 'package:egitimciler/app/views/view_wishlist/wishlist_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+
 
 import '../views/view_splash/splash_view.dart';
 import '../views/view_onboarding/onboarding_first_view.dart';

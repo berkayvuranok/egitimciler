@@ -32,8 +32,9 @@ class ProductViewModel extends Bloc<ProductEvent, ProductState> {
 
       if (rawComments is List) {
         for (var c in rawComments) {
-          if (c is String) comments.add(c);
-          else if (c is Map && c.containsKey('text')) comments.add(c['text'].toString());
+          if (c is String) {
+            comments.add(c);
+          } else if (c is Map && c.containsKey('text')) comments.add(c['text'].toString());
           else comments.add(c.toString());
         }
       } else if (rawComments is String) {

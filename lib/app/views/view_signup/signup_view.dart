@@ -1,6 +1,8 @@
+import 'package:egitimciler/app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import 'package:egitimciler/app/views/view_signup/view_model/signup_event.dart';
 import 'package:egitimciler/app/views/view_signup/view_model/signup_state.dart';
 import 'package:egitimciler/app/views/view_signup/view_model/signup_view_model.dart';
@@ -10,6 +12,9 @@ class SignUpView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get localization instance
+    final l10n = AppLocalizations.of(context);
+    
     return BlocProvider(
       create: (_) => SignUpViewModel(),
       child: Scaffold(
@@ -20,11 +25,13 @@ class SignUpView extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Row(
-                    children: const [
-                      Icon(Icons.check_circle, color: Colors.white, size: 20),
-                      SizedBox(width: 8),
-                      Text('Registration successful! Please sign in.', 
-                          style: TextStyle(color: Colors.white)),
+                    children: [
+                      const Icon(Icons.check_circle, color: Colors.white, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        l10n.registrationSuccess,
+                        style: const TextStyle(color: Colors.white),
+                      ),
                     ],
                   ),
                   backgroundColor: Colors.green,
@@ -43,8 +50,10 @@ class SignUpView extends StatelessWidget {
                     children: [
                       const Icon(Icons.error_outline, color: Colors.white, size: 20),
                       const SizedBox(width: 8),
-                      Text(state.errorMessage!, 
-                          style: const TextStyle(color: Colors.white)),
+                      Text(
+                        state.errorMessage!,
+                        style: const TextStyle(color: Colors.white),
+                      ),
                     ],
                   ),
                   backgroundColor: Colors.red,
@@ -67,7 +76,7 @@ class SignUpView extends StatelessWidget {
             final bool isValidName = state.fullName.length >= 3;
             final bool isNameEmpty = state.fullName.isEmpty;
 
-            // Butonun aktif olması için tüm validasyonların geçerli olması gerekiyor
+            // Form validation for button state
             final bool isFormValid = isValidName && isValidEmail && isValidPassword && passwordsMatch;
 
             return SingleChildScrollView(
@@ -78,6 +87,7 @@ class SignUpView extends StatelessWidget {
                   children: [
                     SizedBox(height: size.height * 0.06),
                     
+                    // Back Button
                     IconButton(
                       icon: Icon(Icons.arrow_back, color: Colors.grey.shade700),
                       onPressed: () => Navigator.pop(context),
@@ -85,6 +95,7 @@ class SignUpView extends StatelessWidget {
                     
                     const SizedBox(height: 20),
                     
+                    // App Logo
                     Center(
                       child: Image.asset(
                         'assets/png/splash/splash.png',
@@ -106,8 +117,9 @@ class SignUpView extends StatelessWidget {
                     
                     SizedBox(height: size.height * 0.03),
                     
+                    // Title
                     Text(
-                      'Create Account',
+                      l10n.createAccount,
                       style: GoogleFonts.poppins(
                         fontSize: 32,
                         fontWeight: FontWeight.w600,
@@ -117,8 +129,9 @@ class SignUpView extends StatelessWidget {
                     
                     const SizedBox(height: 8),
                     
+                    // Subtitle
                     Text(
-                      'Join us to start your learning journey',
+                      l10n.joinUs,
                       style: GoogleFonts.poppins(
                         fontSize: 16,
                         color: Colors.grey.shade600,
@@ -129,7 +142,7 @@ class SignUpView extends StatelessWidget {
                     
                     // Full Name Field
                     Text(
-                      'Full Name',
+                      l10n.fullName,
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
@@ -140,7 +153,7 @@ class SignUpView extends StatelessWidget {
                     TextField(
                       onChanged: (value) => bloc.add(SignUpFullNameChanged(value)),
                       decoration: InputDecoration(
-                        hintText: "Enter your full name",
+                        hintText: l10n.enterFullName,
                         hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -188,11 +201,12 @@ class SignUpView extends StatelessWidget {
                       style: GoogleFonts.poppins(),
                     ),
                     
+                    // Name validation error
                     if (!isNameEmpty && !isValidName)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
-                          'Name must be at least 3 characters long',
+                          l10n.pleaseEnterValidName,
                           style: GoogleFonts.poppins(
                             color: Colors.red,
                             fontSize: 12,
@@ -204,7 +218,7 @@ class SignUpView extends StatelessWidget {
                     
                     // Email Field
                     Text(
-                      'Email',
+                      l10n.email,
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
@@ -215,7 +229,7 @@ class SignUpView extends StatelessWidget {
                     TextField(
                       onChanged: (value) => bloc.add(SignUpEmailChanged(value)),
                       decoration: InputDecoration(
-                        hintText: "Enter your email",
+                        hintText: l10n.enterEmail,
                         hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -264,11 +278,12 @@ class SignUpView extends StatelessWidget {
                       style: GoogleFonts.poppins(),
                     ),
                     
+                    // Email validation error
                     if (!isEmailEmpty && !isValidEmail)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
-                          'Please use a valid @gmail or @yahoo email address',
+                          l10n.pleaseEnterValidName,
                           style: GoogleFonts.poppins(
                             color: Colors.red,
                             fontSize: 12,
@@ -280,7 +295,7 @@ class SignUpView extends StatelessWidget {
                     
                     // Password Field
                     Text(
-                      'Password',
+                      l10n.password,
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
@@ -292,7 +307,7 @@ class SignUpView extends StatelessWidget {
                       obscureText: true,
                       onChanged: (value) => bloc.add(SignUpPasswordChanged(value)),
                       decoration: InputDecoration(
-                        hintText: "Create a password",
+                        hintText: l10n.createPassword,
                         hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -340,11 +355,12 @@ class SignUpView extends StatelessWidget {
                       style: GoogleFonts.poppins(),
                     ),
                     
+                    // Password validation error
                     if (!isPasswordEmpty && !isValidPassword)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
-                          'Password must be at least 10 characters long, contain uppercase, lowercase, numbers and special characters',
+                          l10n.passwordRequirements,
                           style: GoogleFonts.poppins(
                             color: Colors.red,
                             fontSize: 12,
@@ -356,7 +372,7 @@ class SignUpView extends StatelessWidget {
                     
                     // Confirm Password Field
                     Text(
-                      'Confirm Password',
+                      l10n.confirmPassword,
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
@@ -368,7 +384,7 @@ class SignUpView extends StatelessWidget {
                       obscureText: true,
                       onChanged: (value) => bloc.add(SignUpConfirmPasswordChanged(value)),
                       decoration: InputDecoration(
-                        hintText: "Confirm your password",
+                        hintText: l10n.confirmYourPassword,
                         hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -416,11 +432,12 @@ class SignUpView extends StatelessWidget {
                       style: GoogleFonts.poppins(),
                     ),
                     
+                    // Confirm password validation error
                     if (!isConfirmPasswordEmpty && !passwordsMatch)
                       Padding(
                         padding: const EdgeInsets.only(top: 8.0),
                         child: Text(
-                          'Passwords do not match',
+                          l10n.passwordsDoNotMatch,
                           style: GoogleFonts.poppins(
                             color: Colors.red,
                             fontSize: 12,
@@ -441,13 +458,13 @@ class SignUpView extends StatelessWidget {
                                 if (!isFormValid) {
                                   String errorMessage = '';
                                   if (!isValidName) {
-                                    errorMessage = 'Please enter a valid name (min 3 characters)';
+                                    errorMessage = l10n.pleaseEnterValidName;
                                   } else if (!isValidEmail) {
-                                    errorMessage = 'Please use a valid @gmail or @yahoo email address';
+                                    errorMessage = l10n.pleaseUseValidEmail;
                                   } else if (!isValidPassword) {
-                                    errorMessage = 'Password must be at least 10 characters long with uppercase, lowercase, numbers and special characters';
+                                    errorMessage = l10n.passwordRequirements;
                                   } else if (!passwordsMatch) {
-                                    errorMessage = 'Passwords do not match';
+                                    errorMessage = l10n.passwordsDoNotMatch;
                                   }
                                   
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -480,7 +497,7 @@ class SignUpView extends StatelessWidget {
                                 ),
                               )
                             : Text(
-                                'Create Account',
+                                l10n.createAccount,
                                 style: GoogleFonts.poppins(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
@@ -491,7 +508,7 @@ class SignUpView extends StatelessWidget {
                     
                     SizedBox(height: size.height * 0.04),
                     
-                    // Divider
+                    // Divider with localized text
                     Row(
                       children: [
                         Expanded(
@@ -500,7 +517,7 @@ class SignUpView extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
-                            'Or sign up with',
+                            l10n.orSignUpWith,
                             style: GoogleFonts.poppins(
                               color: Colors.grey.shade600,
                               fontSize: 14,
@@ -618,7 +635,7 @@ class SignUpView extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            "Already have an account? ",
+                            l10n.alreadyHaveAccount,
                             style: GoogleFonts.poppins(
                               color: Colors.grey.shade600,
                               fontSize: 14,
@@ -627,7 +644,7 @@ class SignUpView extends StatelessWidget {
                           GestureDetector(
                             onTap: () => Navigator.pop(context),
                             child: Text(
-                              'Sign In',
+                              l10n.signIn,
                               style: GoogleFonts.poppins(
                                 color: Colors.blue,
                                 fontWeight: FontWeight.w600,

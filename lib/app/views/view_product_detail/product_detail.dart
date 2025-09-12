@@ -114,8 +114,11 @@ class _ProductDetailContentState extends State<_ProductDetailContent> {
             break;
           case 4:
             final user = Supabase.instance.client.auth.currentUser;
-            if (user != null) Navigator.pushNamed(context, '/profile');
-            else Navigator.pushNamed(context, '/login');
+            if (user != null) {
+              Navigator.pushNamed(context, '/profile');
+            } else {
+              Navigator.pushNamed(context, '/login');
+            }
             break;
         }
       },

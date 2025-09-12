@@ -1,3 +1,4 @@
+// search_view.dart
 import 'package:egitimciler/app/views/view_product_detail/product_detail.dart';
 import 'package:egitimciler/app/views/view_search/view_model/search_event.dart';
 import 'package:egitimciler/app/views/view_search/view_model/search_state.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:egitimciler/app/l10n/app_localizations.dart';
 
 class SearchView extends StatelessWidget {
   const SearchView({super.key});
@@ -31,27 +33,29 @@ class _SearchViewContentState extends State<_SearchViewContent> {
   final TextEditingController searchController = TextEditingController();
 
   void _handleBottomNavTap(int index) {
-    if (index == 0) {
-      Navigator.pushNamed(context, '/home');
-    } else if (index == 1) {
-      // Zaten Search ekranındayız
-    } else if (index == 2) {
-      Navigator.pushNamed(context, '/my_learning');
-    } else if (index == 3) {
-      Navigator.pushNamed(context, '/wishlist');
+    final user = Supabase.instance.client.auth.currentUser;
+    switch (index) {
+      case 0:
+        Navigator.pushNamed(context, '/home');
+        break;
+      case 1:
+        // Zaten Search ekranındayız
+        break;
+      case 2:
+        Navigator.pushNamed(context, '/my_learning');
+        break;
+      case 3:
+        Navigator.pushNamed(context, '/wishlist');
+        break;
+      case 4:
+        if (user != null) {
+          Navigator.pushNamed(context, '/profile');
+        } else {
+          Navigator.pushNamed(context, '/login');
+        }
+        break;
     }
-    else if (index == 4) {
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user == null) {
-        Navigator.pushNamed(context, '/login');
-      } else {
-        Navigator.pushNamed(context, '/profile');
-      }
-    } else {
-      setState(() {
-        currentIndex = index;
-      });
-    }
+    setState(() => currentIndex = index);
   }
 
   String _getImageUrl(dynamic imageField, int index) {
@@ -63,6 +67,8 @@ class _SearchViewContentState extends State<_SearchViewContent> {
 
   @override
   Widget build(BuildContext context) {
+    final local = AppLocalizations.of(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -73,7 +79,7 @@ class _SearchViewContentState extends State<_SearchViewContent> {
             TextField(
               controller: searchController,
               decoration: InputDecoration(
-                hintText: 'Search Product',
+                hintText: local.searchHint,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -96,7 +102,7 @@ class _SearchViewContentState extends State<_SearchViewContent> {
                   if (state is SearchLoaded) {
                     final results = state.results;
                     if (results.isEmpty) {
-                      return const Center(child: Text('No results found.'));
+                      return Center(child: Text(local.noResultsFound));
                     }
                     return ListView.builder(
                       itemCount: results.length,
@@ -109,8 +115,7 @@ class _SearchViewContentState extends State<_SearchViewContent> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) =>
-                                    ProductDetailView(product: product),
+                                builder: (_) => ProductDetailView(product: product),
                               ),
                             );
                           },
@@ -137,8 +142,7 @@ class _SearchViewContentState extends State<_SearchViewContent> {
                                   child: Padding(
                                     padding: const EdgeInsets.all(8),
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           product['name'] ?? '',
@@ -148,9 +152,8 @@ class _SearchViewContentState extends State<_SearchViewContent> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          'Instructor: ${product['instructor']}',
-                                          style:
-                                              GoogleFonts.poppins(fontSize: 12),
+                                          local.instructorLabel(product['instructor'] ?? ''),
+                                          style: GoogleFonts.poppins(fontSize: 12),
                                         ),
                                       ],
                                     ),
@@ -179,12 +182,12 @@ class _SearchViewContentState extends State<_SearchViewContent> {
         selectedLabelStyle: GoogleFonts.poppins(),
         unselectedLabelStyle: GoogleFonts.poppins(),
         onTap: _handleBottomNavTap,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.star), label: 'Featured'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(icon: Icon(Icons.menu_book), label: 'My Learning'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'WishList'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Account'),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.star), label: local.featured),
+          BottomNavigationBarItem(icon: const Icon(Icons.search), label: local.search),
+          BottomNavigationBarItem(icon: const Icon(Icons.menu_book), label: local.myLearning),
+          BottomNavigationBarItem(icon: const Icon(Icons.favorite), label: local.wishlist),
+          BottomNavigationBarItem(icon: const Icon(Icons.account_circle), label: local.account),
         ],
       ),
     );
