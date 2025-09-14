@@ -7,6 +7,7 @@ import 'package:egitimciler/app/views/view_signup/view_model/signup_event.dart';
 import 'package:egitimciler/app/views/view_signup/view_model/signup_state.dart';
 import 'package:egitimciler/app/views/view_signup/view_model/signup_view_model.dart';
 
+
 class SignUpView extends StatelessWidget {
   const SignUpView({super.key});
 
@@ -663,6 +664,24 @@ class SignUpView extends StatelessWidget {
             );
           },
         ),
+        bottomNavigationBar: _buildBottomNavBar(context, 4, (index) {
+          if (index != 4) {
+            switch (index) {
+              case 0:
+                Navigator.pushNamed(context, '/home');
+                break;
+              case 1:
+                Navigator.pushNamed(context, '/search');
+                break;
+              case 2:
+                Navigator.pushNamed(context, '/my_learning');
+                break;
+              case 3:
+                Navigator.pushNamed(context, '/wishlist');
+                break;
+            }
+          }
+        }),
       ),
     );
   }
@@ -682,5 +701,28 @@ class SignUpView extends StatelessWidget {
     if (!password.contains(RegExp(r'[0-9]'))) return false;
     if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) return false;
     return true;
+  }
+
+  Widget _buildBottomNavBar(BuildContext context, int currentIndex, Function(int) onTap) {
+    final loc = AppLocalizations.of(context);
+
+    return BottomNavigationBar(
+      currentIndex: currentIndex,
+      backgroundColor: Colors.white,
+      type: BottomNavigationBarType.fixed,
+      selectedItemColor: Colors.blue,
+      unselectedItemColor: Colors.grey.shade600,
+      showUnselectedLabels: true,
+      onTap: (index) {
+        onTap(index);
+      },
+      items: [
+        BottomNavigationBarItem(icon: const Icon(Icons.star), label: loc.featured),
+        BottomNavigationBarItem(icon: const Icon(Icons.search), label: loc.search),
+        BottomNavigationBarItem(icon: const Icon(Icons.menu_book), label: loc.myLearning),
+        BottomNavigationBarItem(icon: const Icon(Icons.favorite), label: loc.wishlist),
+        BottomNavigationBarItem(icon: const Icon(Icons.account_circle), label: loc.account),
+      ],
+    );
   }
 }
