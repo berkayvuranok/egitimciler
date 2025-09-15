@@ -1,3 +1,4 @@
+import 'package:egitimciler/app/views/view_product_detail/view_model/product_event.dart';
 import 'package:flutter/material.dart';
 import 'app_localizations_en.dart' as en;
 import 'app_localizations_tr.dart' as tr;
@@ -63,6 +64,8 @@ abstract class AppLocalizations {
   // Ürün listesi başlıkları
   String get recommended;
   String get shortCourses;
+  String get duration;
+  String get rating;
 
   // Profile section
   String get profile;
@@ -120,6 +123,11 @@ abstract class AppLocalizations {
   String get wishlistError;
   String get removeFromWishlist;
   String get addedToWishlist;
+  String get edit;
+  String get addToMyLearning;
+  String get comments;
+  String get AddComment;
+  String get updateRating;
 }
 
 // Delegate
@@ -141,5 +149,6 @@ class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   }
 
   @override
-  bool shouldReload(covariant LocalizationsDelegate<AppLocalizations> old) => false;
+  bool shouldReload(covariant LocalizationsDelegate<AppLocalizations> old) =>
+      false;
 }

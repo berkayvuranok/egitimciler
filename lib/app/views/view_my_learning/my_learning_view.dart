@@ -66,6 +66,30 @@ class _MyLearningViewState extends State<MyLearningView> {
   Widget build(BuildContext context) {
     final local = AppLocalizations.of(context);
     final isDarkMode = context.watch<ThemeCubit>().state == ThemeMode.dark;
+    final user = Supabase.instance.client.auth.currentUser;
+
+    // 🔹 Eğer kullanıcı giriş yapmamışsa uyarı göster (Wishlist'teki gibi)
+    if (user == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(local.myLearning, style: GoogleFonts.poppins(color: isDarkMode ? Colors.white : Colors.black)),
+          backgroundColor: isDarkMode ? Colors.black : Colors.white,
+          foregroundColor: isDarkMode ? Colors.white : Colors.black87,
+        ),
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
+        body: Center(
+          child: Text(
+            local.wishlistError, // 🔹 Aynı local mesajı kullanıyoruz
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: isDarkMode ? Colors.white : Colors.black,
+            ),
+          ),
+        ),
+        bottomNavigationBar: _buildBottomNavBar(local, isDarkMode),
+      );
+    }
 
     return BlocProvider(
       create: (_) => MyLearningViewModel(Supabase.instance.client)..add(LoadMyCourses()),
@@ -88,8 +112,12 @@ class _MyLearningViewState extends State<MyLearningView> {
             if (courses.isEmpty) {
               bodyContent = Center(
                 child: Text(
-                  local.noResultsFound,
-                  style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+                  local.noProductFound, // 🔹 Ürün bulunamadı mesajı
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
                 ),
               );
             } else {

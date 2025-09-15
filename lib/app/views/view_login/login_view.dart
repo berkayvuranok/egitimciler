@@ -274,17 +274,7 @@ class LoginView extends StatelessWidget {
                       ),
                     ),
                     
-                    if (!isPasswordEmpty && !isValidPassword)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          locale.passwordError,
-                          style: GoogleFonts.poppins(
-                            color: Colors.red,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
+                    
                     
                     const SizedBox(height: 16),
                     

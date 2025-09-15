@@ -103,4 +103,12 @@ class AppLocalizationsEn extends AppLocalizations {
    @override String get wishlistError => 'Error loading wishlist. Please login.';
    @override String get removeFromWishlist => 'Remove from Wishlist';
    @override String get addedToWishlist => 'Added to Wishlist';
+   @override String get duration => 'Duration';
+   @override String get rating => 'Rating';
+   @override String get edit => 'Edit';
+   @override String get addToMyLearning => 'Add to My Learning';
+   @override String get comments => 'Comments';
+   @override String get AddComment => 'Add Comment';
+     @override
+  String get updateRating => 'Update Rating';
 }

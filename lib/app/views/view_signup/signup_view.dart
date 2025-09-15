@@ -43,8 +43,14 @@ class SignUpView extends StatelessWidget {
                 ),
               );
               
+              // Ana sayfaya yönlendirme - DEĞİŞİKLİK BURADA
               Future.delayed(const Duration(milliseconds: 1500), () {
-                Navigator.pop(context);
+                // Navigator.pop(context); // Eskisi - sadece geri dönüyordu
+                Navigator.pushNamedAndRemoveUntil(
+                  context, 
+                  '/home', 
+                  (route) => false // Tüm önceki routeları temizle
+                );
               });
             } else if (state.errorMessage != null) {
               ScaffoldMessenger.of(context).showSnackBar(
