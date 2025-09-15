@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:egitimciler/app/l10n/app_localizations.dart';
+import '../../app_provider/theme_cubit.dart'; // Dark mode cubit
 
 class MyLearningView extends StatefulWidget {
   const MyLearningView({super.key});
@@ -19,12 +20,12 @@ class MyLearningView extends StatefulWidget {
 class _MyLearningViewState extends State<MyLearningView> {
   int currentIndex = 2; // Başlangıçta My Learning seçili
 
-  BottomNavigationBar _buildBottomNavBar(AppLocalizations local) {
+  BottomNavigationBar _buildBottomNavBar(AppLocalizations local, bool isDarkMode) {
     final user = Supabase.instance.client.auth.currentUser;
     return BottomNavigationBar(
-      backgroundColor: Colors.white,
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
       selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.black54,
+      unselectedItemColor: isDarkMode ? Colors.white70 : Colors.black54,
       currentIndex: currentIndex,
       type: BottomNavigationBarType.fixed,
       onTap: (index) {
@@ -64,10 +65,10 @@ class _MyLearningViewState extends State<MyLearningView> {
   @override
   Widget build(BuildContext context) {
     final local = AppLocalizations.of(context);
+    final isDarkMode = context.watch<ThemeCubit>().state == ThemeMode.dark;
 
     return BlocProvider(
-      create: (_) =>
-          MyLearningViewModel(Supabase.instance.client)..add(LoadMyCourses()),
+      create: (_) => MyLearningViewModel(Supabase.instance.client)..add(LoadMyCourses()),
       child: BlocBuilder<MyLearningViewModel, MyLearningState>(
         builder: (context, state) {
           Widget bodyContent;
@@ -75,12 +76,22 @@ class _MyLearningViewState extends State<MyLearningView> {
           if (state is MyLearningLoading) {
             bodyContent = const Center(child: CircularProgressIndicator());
           } else if (state is MyLearningError) {
-            bodyContent = Center(child: Text(state.message));
+            bodyContent = Center(
+              child: Text(
+                state.message,
+                style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+              ),
+            );
           } else if (state is MyLearningLoaded) {
             final courses = state.courses;
 
             if (courses.isEmpty) {
-              bodyContent = Center(child: Text(local.noResultsFound)); // Lokalize edildi
+              bodyContent = Center(
+                child: Text(
+                  local.noResultsFound,
+                  style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+                ),
+              );
             } else {
               bodyContent = ListView.builder(
                 padding: const EdgeInsets.all(16),
@@ -98,9 +109,9 @@ class _MyLearningViewState extends State<MyLearningView> {
                       );
                     },
                     child: Card(
+                      color: isDarkMode ? Colors.grey[900] : Colors.white,
                       margin: const EdgeInsets.only(bottom: 16),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       child: ListTile(
                         leading: Image.network(
                           imageUrl,
@@ -108,10 +119,18 @@ class _MyLearningViewState extends State<MyLearningView> {
                           height: 60,
                           fit: BoxFit.cover,
                         ),
-                        title: Text(product['name'] ?? '', style: GoogleFonts.poppins()),
+                        title: Text(
+                          product['name'] ?? '',
+                          style: GoogleFonts.poppins(
+                            color: isDarkMode ? Colors.white : Colors.black,
+                          ),
+                        ),
                         subtitle: Text(
                           local.instructorLabel(product['instructor'] ?? '-'),
-                          style: GoogleFonts.poppins(fontSize: 12),
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: isDarkMode ? Colors.white70 : Colors.black54,
+                          ),
                         ),
                       ),
                     ),
@@ -124,14 +143,14 @@ class _MyLearningViewState extends State<MyLearningView> {
           }
 
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: isDarkMode ? Colors.black : Colors.white,
             appBar: AppBar(
-              title: Text(local.myLearning),
+              title: Text(local.myLearning, style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
               centerTitle: true,
-              backgroundColor: Colors.white,
-              foregroundColor: Colors.black87,
+              backgroundColor: isDarkMode ? Colors.black : Colors.white,
+              foregroundColor: isDarkMode ? Colors.white : Colors.black87,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: Icon(Icons.arrow_back, color: isDarkMode ? Colors.white : Colors.black),
                 onPressed: () {
                   setState(() {
                     currentIndex = 0; // Featured seçili
@@ -140,7 +159,7 @@ class _MyLearningViewState extends State<MyLearningView> {
                 },
               ),
             ),
-            bottomNavigationBar: _buildBottomNavBar(local),
+            bottomNavigationBar: _buildBottomNavBar(local, isDarkMode),
             body: bodyContent,
           );
         },
