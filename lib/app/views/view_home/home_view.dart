@@ -10,6 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:egitimciler/app/l10n/app_localizations.dart';
 import '../../app_provider/locale_cubit.dart';
+import '../../app_provider/theme_cubit.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
@@ -23,8 +24,8 @@ class HomeView extends StatelessWidget {
               HomeViewModel(Supabase.instance.client)..add(LoadHomeData()),
         ),
         BlocProvider(
-          create: (_) => WishlistViewModel(Supabase.instance.client)
-            ..add(LoadWishlist()),
+          create: (_) =>
+              WishlistViewModel(Supabase.instance.client)..add(LoadWishlist()),
         ),
       ],
       child: const _HomeViewContent(),
@@ -41,7 +42,6 @@ class _HomeViewContent extends StatefulWidget {
 
 class _HomeViewContentState extends State<_HomeViewContent> {
   int currentIndex = 0;
-
   late List<String> categories;
   final List<Color> categoryColors = [
     Colors.blue,
@@ -137,9 +137,9 @@ class _HomeViewContentState extends State<_HomeViewContent> {
   }
 
   Widget _buildProductItem(
-      Map<String, dynamic> product,
-      List<Map<String, dynamic>> wishlist,
-      ) {
+    Map<String, dynamic> product,
+    List<Map<String, dynamic>> wishlist,
+  ) {
     final imageUrl = product['image_url'] ?? 'https://via.placeholder.com/150';
     final productName = product['name'] ?? 'No Title';
     final productPrice = product['price'] ?? 0;
@@ -155,7 +155,9 @@ class _HomeViewContentState extends State<_HomeViewContent> {
             margin: const EdgeInsets.only(right: 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: Colors.grey[300],
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black
+                  : Colors.white,
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
@@ -176,7 +178,9 @@ class _HomeViewContentState extends State<_HomeViewContent> {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withAlpha(200),
+                    Theme.of(context).brightness == Brightness.dark
+                        ? Colors.black.withAlpha(200)
+                        : Colors.black.withAlpha(100),
                   ],
                 ),
               ),
@@ -190,7 +194,9 @@ class _HomeViewContentState extends State<_HomeViewContent> {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black,
                         fontSize: 12,
                       ),
                       maxLines: 2,
@@ -203,7 +209,9 @@ class _HomeViewContentState extends State<_HomeViewContent> {
                       '$productPrice ₺',
                       style: GoogleFonts.poppins(
                         fontSize: 12,
-                        color: Colors.white,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white
+                            : Colors.black,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -221,7 +229,8 @@ class _HomeViewContentState extends State<_HomeViewContent> {
                 if (wishlistState is WishlistLoaded) {
                   wishlistProducts = wishlistState.products;
                 }
-                final isFavorite = _isInWishlist(wishlistProducts, product['id']);
+                final isFavorite =
+                    _isInWishlist(wishlistProducts, product['id']);
                 return Container(
                   decoration: BoxDecoration(
                     color: Colors.black54,
@@ -252,10 +261,10 @@ class _HomeViewContentState extends State<_HomeViewContent> {
   }
 
   Widget _buildProductSection(
-      String title,
-      List<Map<String, dynamic>> products,
-      List<Map<String, dynamic>> wishlist,
-      ) {
+    String title,
+    List<Map<String, dynamic>> products,
+    List<Map<String, dynamic>> wishlist,
+  ) {
     if (products.isEmpty) return const SizedBox();
 
     return Column(
@@ -265,8 +274,13 @@ class _HomeViewContentState extends State<_HomeViewContent> {
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Text(
             title,
-            style:
-                GoogleFonts.poppins(fontSize: 18, fontWeight: FontWeight.bold),
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : Colors.black,
+            ),
           ),
         ),
         SizedBox(
@@ -282,40 +296,101 @@ class _HomeViewContentState extends State<_HomeViewContent> {
     );
   }
 
-  Widget _buildLanguageSwitcher() {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: BlocBuilder<LocaleCubit, Locale>(
-          builder: (context, locale) {
-            return DropdownButton<String>(
-              value: locale.languageCode,
-              underline: const SizedBox(),
-              icon: const Icon(Icons.language, size: 18),
-              items: const [
-                DropdownMenuItem(
-                  value: 'en',
-                  child: Text('English', style: TextStyle(fontSize: 12)),
+  Widget _buildLanguageAndThemeSwitcher() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8), // bottom bar’a yakın
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          SizedBox(
+            height: 32,
+            child: Row(
+              children: [
+                // Language Selector
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[800]
+                        : Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: BlocBuilder<LocaleCubit, Locale>(
+                    builder: (context, locale) {
+                      return DropdownButton<String>(
+                        value: locale.languageCode,
+                        underline: const SizedBox(),
+                        icon: const Icon(Icons.language, size: 16),
+                        dropdownColor:
+                            Theme.of(context).brightness == Brightness.dark
+                                ? Colors.black
+                                : Colors.white,
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'en',
+                            child: Text('English',
+                                style: TextStyle(fontSize: 12)),
+                          ),
+                          DropdownMenuItem(
+                            value: 'tr',
+                            child: Text('Türkçe',
+                                style: TextStyle(fontSize: 12)),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null &&
+                              value != locale.languageCode) {
+                            context
+                                .read<LocaleCubit>()
+                                .changeLocale(Locale(value));
+                          }
+                        },
+                      );
+                    },
+                  ),
                 ),
-                DropdownMenuItem(
-                  value: 'tr',
-                  child: Text('Türkçe', style: TextStyle(fontSize: 12)),
+                // Dark Mode Toggle
+                Container(
+                  height: 32,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey[800]
+                        : Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: BlocBuilder<ThemeCubit, ThemeMode>(
+                    builder: (context, themeMode) {
+                      final isDarkMode = themeMode == ThemeMode.dark;
+                      return GestureDetector(
+                        onTap: () {
+                          context.read<ThemeCubit>().toggleTheme();
+                        },
+                        child: Row(
+                          children: [
+                            Icon(
+                              isDarkMode
+                                  ? Icons.dark_mode
+                                  : Icons.light_mode,
+                              size: 16,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              isDarkMode ? 'Dark' : 'Light',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ],
-              onChanged: (value) {
-                if (value != null && value != locale.languageCode) {
-                  context.read<LocaleCubit>().changeLocale(Locale(value));
-                }
-              },
-            );
-          },
-        ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -325,9 +400,14 @@ class _HomeViewContentState extends State<_HomeViewContent> {
       builder: (context, locale) {
         final loc = AppLocalizations.of(context);
         return BottomNavigationBar(
-          backgroundColor: Colors.white,
+          backgroundColor:
+              Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black
+                  : Colors.white,
           selectedItemColor: Colors.blue,
-          unselectedItemColor: Colors.black54,
+          unselectedItemColor: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white70
+              : Colors.black54,
           currentIndex: currentIndex,
           type: BottomNavigationBarType.fixed,
           onTap: (index) {
@@ -355,11 +435,16 @@ class _HomeViewContentState extends State<_HomeViewContent> {
             }
           },
           items: [
-            BottomNavigationBarItem(icon: const Icon(Icons.star), label: loc.featured),
-            BottomNavigationBarItem(icon: const Icon(Icons.search), label: loc.search),
-            BottomNavigationBarItem(icon: const Icon(Icons.menu_book), label: loc.myLearning),
-            BottomNavigationBarItem(icon: const Icon(Icons.favorite), label: loc.wishlist),
-            BottomNavigationBarItem(icon: const Icon(Icons.account_circle), label: loc.account),
+            BottomNavigationBarItem(
+                icon: const Icon(Icons.star), label: loc.featured),
+            BottomNavigationBarItem(
+                icon: const Icon(Icons.search), label: loc.search),
+            BottomNavigationBarItem(
+                icon: const Icon(Icons.menu_book), label: loc.myLearning),
+            BottomNavigationBarItem(
+                icon: const Icon(Icons.favorite), label: loc.wishlist),
+            BottomNavigationBarItem(
+                icon: const Icon(Icons.account_circle), label: loc.account),
           ],
         );
       },
@@ -371,7 +456,9 @@ class _HomeViewContentState extends State<_HomeViewContent> {
     return BlocBuilder<HomeViewModel, HomeState>(
       builder: (context, homeState) {
         return Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).brightness == Brightness.dark
+              ? Colors.black
+              : Colors.white,
           body: BlocBuilder<WishlistViewModel, WishlistState>(
             builder: (context, wishlistState) {
               List<Map<String, dynamic>> wishlistProducts = [];
@@ -384,7 +471,16 @@ class _HomeViewContentState extends State<_HomeViewContent> {
               }
 
               if (homeState is HomeError) {
-                return Center(child: Text(homeState.message));
+                return Center(
+                  child: Text(
+                    homeState.message,
+                    style: TextStyle(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : Colors.black,
+                    ),
+                  ),
+                );
               }
 
               if (homeState is HomeLoaded) {
@@ -408,7 +504,7 @@ class _HomeViewContentState extends State<_HomeViewContent> {
                             AppLocalizations.of(context).shortCourses,
                             products,
                             wishlistProducts),
-                      _buildLanguageSwitcher(),
+                      _buildLanguageAndThemeSwitcher(),
                     ],
                   ),
                 );

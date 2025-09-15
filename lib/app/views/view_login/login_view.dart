@@ -7,6 +7,7 @@ import 'package:egitimciler/app/views/view_login/view_model/login_view_model.dar
 import 'package:egitimciler/app/views/view_profile/profile_view.dart';
 import 'package:egitimciler/app/views/view_signup/signup_view.dart';
 import 'package:egitimciler/app/l10n/app_localizations.dart';
+import '../../app_provider/theme_cubit.dart'; // Dark mode cubit
 
 class LoginView extends StatelessWidget {
   const LoginView({super.key});
@@ -14,10 +15,12 @@ class LoginView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context);
+    final isDarkMode = context.watch<ThemeCubit>().state == ThemeMode.dark;
+    
     return BlocProvider(
       create: (_) => LoginViewModel(),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
         body: BlocConsumer<LoginViewModel, LoginState>(
           listener: (context, state) {
             if (state.isSuccess) {
@@ -66,6 +69,7 @@ class LoginView extends StatelessWidget {
             final bool isEmailEmpty = state.email.isEmpty;
             final bool isValidPassword = _validatePassword(state.password);
             final bool isPasswordEmpty = state.password.isEmpty;
+            final isDarkMode = context.watch<ThemeCubit>().state == ThemeMode.dark;
 
             return SingleChildScrollView(
               child: Padding(
@@ -85,10 +89,10 @@ class LoginView extends StatelessWidget {
                             width: 120,
                             height: 120,
                             decoration: BoxDecoration(
-                              color: Colors.blue,
+                              color: isDarkMode ? Colors.blue.shade700 : Colors.blue,
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: const Icon(Icons.school, size: 60, color: Colors.white),
+                            child: Icon(Icons.school, size: 60, color: isDarkMode ? Colors.white : Colors.white),
                           );
                         },
                       ),
@@ -102,7 +106,7 @@ class LoginView extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: isDarkMode ? Colors.white : Colors.black87,
                       ),
                     ),
                     
@@ -112,7 +116,7 @@ class LoginView extends StatelessWidget {
                       locale.signInToContinue,
                       style: GoogleFonts.poppins(
                         fontSize: 16,
-                        color: Colors.grey.shade600,
+                        color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
                       ),
                     ),
                     
@@ -124,21 +128,26 @@ class LoginView extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
-                        color: Colors.grey.shade700,
+                        color: isDarkMode ? Colors.white : Colors.grey.shade700,
                       ),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       onChanged: (value) => bloc.add(LoginEmailChanged(value)),
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                       decoration: InputDecoration(
                         hintText: locale.enterEmail,
-                        hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400),
+                        hintStyle: GoogleFonts.poppins(
+                          color: isDarkMode ? Colors.grey.shade500 : Colors.grey.shade400,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
                             color: !isEmailEmpty 
                               ? (isValidEmail ? Colors.green : Colors.red)
-                              : Colors.grey.shade300,
+                              : isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300,
                             width: !isEmailEmpty ? 2 : 1,
                           ),
                         ),
@@ -147,7 +156,7 @@ class LoginView extends StatelessWidget {
                           borderSide: BorderSide(
                             color: !isEmailEmpty 
                               ? (isValidEmail ? Colors.green : Colors.red)
-                              : Colors.grey.shade300,
+                              : isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300,
                             width: !isEmailEmpty ? 2 : 1,
                           ),
                         ),
@@ -161,12 +170,12 @@ class LoginView extends StatelessWidget {
                           ),
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
                         prefixIcon: Icon(
                           Icons.email_outlined, 
                           color: !isEmailEmpty 
                             ? (isValidEmail ? Colors.green : Colors.red)
-                            : Colors.grey.shade600,
+                            : isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
                         ),
                         suffixIcon: !isEmailEmpty
                           ? Icon(
@@ -177,7 +186,6 @@ class LoginView extends StatelessWidget {
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
                       keyboardType: TextInputType.emailAddress,
-                      style: GoogleFonts.poppins(),
                     ),
                     
                     if (!isEmailEmpty && !isValidEmail)
@@ -200,22 +208,27 @@ class LoginView extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
-                        color: Colors.grey.shade700,
+                        color: isDarkMode ? Colors.white : Colors.grey.shade700,
                       ),
                     ),
                     const SizedBox(height: 8),
                     TextField(
                       obscureText: true,
                       onChanged: (value) => bloc.add(LoginPasswordChanged(value)),
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                       decoration: InputDecoration(
                         hintText: locale.createPassword,
-                        hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400),
+                        hintStyle: GoogleFonts.poppins(
+                          color: isDarkMode ? Colors.grey.shade500 : Colors.grey.shade400,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
                             color: !isPasswordEmpty 
                               ? (isValidPassword ? Colors.green : Colors.red)
-                              : Colors.grey.shade300,
+                              : isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300,
                             width: !isPasswordEmpty ? 2 : 1,
                           ),
                         ),
@@ -224,7 +237,7 @@ class LoginView extends StatelessWidget {
                           borderSide: BorderSide(
                             color: !isPasswordEmpty 
                               ? (isValidPassword ? Colors.green : Colors.red)
-                              : Colors.grey.shade300,
+                              : isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300,
                             width: !isPasswordEmpty ? 2 : 1,
                           ),
                         ),
@@ -238,12 +251,12 @@ class LoginView extends StatelessWidget {
                           ),
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
                         prefixIcon: Icon(
                           Icons.lock_outline, 
                           color: !isPasswordEmpty 
                             ? (isValidPassword ? Colors.green : Colors.red)
-                            : Colors.grey.shade600,
+                            : isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
                         ),
                         suffixIcon: !isPasswordEmpty
                           ? Icon(
@@ -253,13 +266,12 @@ class LoginView extends StatelessWidget {
                           : IconButton(
                               icon: Icon(
                                 Icons.visibility_outlined,
-                                color: Colors.grey.shade600,
+                                color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
                               ),
                               onPressed: () {},
                             ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
-                      style: GoogleFonts.poppins(),
                     ),
                     
                     if (!isPasswordEmpty && !isValidPassword)
@@ -280,7 +292,7 @@ class LoginView extends StatelessWidget {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {
-                          _showForgotPasswordDialog(context, locale);
+                          _showForgotPasswordDialog(context, locale, isDarkMode);
                         },
                         child: Text(
                           locale.forgotPassword,
@@ -320,8 +332,8 @@ class LoginView extends StatelessWidget {
                                 }
                               },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
+                          backgroundColor: isDarkMode ? Colors.blue.shade200 : Colors.blue,
+                          foregroundColor: isDarkMode ? Colors.black : Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -329,11 +341,11 @@ class LoginView extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(horizontal: 24),
                         ),
                         child: state.isSubmitting
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 24,
                                 height: 24,
                                 child: CircularProgressIndicator(
-                                  color: Colors.white,
+                                  color: isDarkMode ? Colors.black : Colors.white,
                                   strokeWidth: 3,
                                 ),
                               )
@@ -353,7 +365,7 @@ class LoginView extends StatelessWidget {
                       child: Text(
                         locale.orContinueWith,
                         style: GoogleFonts.poppins(
-                          color: Colors.grey.shade600,
+                          color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
                         ),
                       ),
                     ),
@@ -368,16 +380,20 @@ class LoginView extends StatelessWidget {
                           width: 56,
                           height: 56,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDarkMode ? Colors.grey.shade800 : Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.shade200,
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                            border: Border.all(
+                              color: isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300,
+                            ),
+                            boxShadow: isDarkMode 
+                              ? null
+                              : [
+                                  BoxShadow(
+                                    color: Colors.grey.shade200,
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                           ),
                           child: IconButton(
                             onPressed: () {},
@@ -386,7 +402,11 @@ class LoginView extends StatelessWidget {
                               width: 24,
                               height: 24,
                               errorBuilder: (context, error, stackTrace) {
-                                return const Icon(Icons.mail, color: Colors.red, size: 24);
+                                return Icon(
+                                  Icons.mail, 
+                                  color: isDarkMode ? Colors.white : Colors.red, 
+                                  size: 24
+                                );
                               },
                             ),
                           ),
@@ -399,15 +419,17 @@ class LoginView extends StatelessWidget {
                           width: 56,
                           height: 56,
                           decoration: BoxDecoration(
-                            color: Colors.black,
+                            color: isDarkMode ? Colors.grey.shade800 : Colors.black,
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.shade200,
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                            boxShadow: isDarkMode 
+                              ? null
+                              : [
+                                  BoxShadow(
+                                    color: Colors.grey.shade200,
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                           ),
                           child: IconButton(
                             onPressed: () {},
@@ -416,7 +438,11 @@ class LoginView extends StatelessWidget {
                               width: 24,
                               height: 24,
                               errorBuilder: (context, error, stackTrace) {
-                                return const Icon(Icons.apple, color: Colors.white, size: 24);
+                                return Icon(
+                                  Icons.apple, 
+                                  color: isDarkMode ? Colors.white : Colors.white, 
+                                  size: 24
+                                );
                               },
                             ),
                           ),
@@ -429,15 +455,17 @@ class LoginView extends StatelessWidget {
                           width: 56,
                           height: 56,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1877F2),
+                            color: isDarkMode ? Colors.blue.shade800 : const Color(0xFF1877F2),
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.shade200,
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                            boxShadow: isDarkMode 
+                              ? null
+                              : [
+                                  BoxShadow(
+                                    color: Colors.grey.shade200,
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                           ),
                           child: IconButton(
                             onPressed: () {},
@@ -446,7 +474,11 @@ class LoginView extends StatelessWidget {
                               width: 24,
                               height: 24,
                               errorBuilder: (context, error, stackTrace) {
-                                return const Icon(Icons.facebook, color: Colors.white, size: 24);
+                                return Icon(
+                                  Icons.facebook, 
+                                  color: isDarkMode ? Colors.white : Colors.white, 
+                                  size: 24
+                                );
                               },
                             ),
                           ),
@@ -462,7 +494,7 @@ class LoginView extends StatelessWidget {
                         Text(
                           locale.dontHaveAccount,
                           style: GoogleFonts.poppins(
-                            color: Colors.grey.shade600,
+                            color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
                           ),
                         ),
                         const SizedBox(width: 4),
@@ -508,7 +540,7 @@ class LoginView extends StatelessWidget {
                 break;
             }
           }
-        }),
+        }, isDarkMode),
       ),
     );
   }
@@ -522,24 +554,60 @@ class LoginView extends StatelessWidget {
     return true;
   }
 
-  void _showForgotPasswordDialog(BuildContext context, AppLocalizations locale) {
+  void _showForgotPasswordDialog(BuildContext context, AppLocalizations locale, bool isDarkMode) {
     final emailController = TextEditingController();
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(locale.passwordResetTitle, style: GoogleFonts.poppins()),
+          backgroundColor: isDarkMode ? Colors.grey.shade900 : Colors.white,
+          title: Text(
+            locale.passwordResetTitle, 
+            style: GoogleFonts.poppins(
+              color: isDarkMode ? Colors.white : Colors.black,
+            ),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(locale.passwordResetHint, style: GoogleFonts.poppins(color: Colors.grey.shade600)),
+              Text(
+                locale.passwordResetHint, 
+                style: GoogleFonts.poppins(
+                  color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                ),
+              ),
               const SizedBox(height: 16),
               TextField(
                 controller: emailController,
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
                 decoration: InputDecoration(
                   labelText: locale.email,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  labelStyle: TextStyle(
+                    color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: Colors.blue,
+                    ),
+                  ),
+                  filled: true,
+                  fillColor: isDarkMode ? Colors.grey.shade800 : Colors.grey.shade50,
                 ),
                 keyboardType: TextInputType.emailAddress,
               ),
@@ -548,7 +616,12 @@ class LoginView extends StatelessWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text(locale.cancel, style: GoogleFonts.poppins()),
+              child: Text(
+                locale.cancel, 
+                style: GoogleFonts.poppins(
+                  color: isDarkMode ? Colors.grey.shade300 : Colors.grey.shade700,
+                ),
+              ),
             ),
             ElevatedButton(
               onPressed: () {
@@ -570,6 +643,10 @@ class LoginView extends StatelessWidget {
                   );
                 }
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isDarkMode ? Colors.blue.shade200 : Colors.blue,
+                foregroundColor: isDarkMode ? Colors.black : Colors.white,
+              ),
               child: Text(locale.sendResetLink, style: GoogleFonts.poppins()),
             ),
           ],
@@ -578,12 +655,12 @@ class LoginView extends StatelessWidget {
     );
   }
 
-  BottomNavigationBar _buildBottomNavBar(BuildContext context, int currentIndex, Function(int) onTap) {
+  BottomNavigationBar _buildBottomNavBar(BuildContext context, int currentIndex, Function(int) onTap, bool isDarkMode) {
     final locale = AppLocalizations.of(context);
     return BottomNavigationBar(
-      backgroundColor: Colors.white,
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
       selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.black54,
+      unselectedItemColor: isDarkMode ? Colors.white70 : Colors.black54,
       currentIndex: currentIndex,
       type: BottomNavigationBarType.fixed,
       selectedLabelStyle: GoogleFonts.poppins(fontSize: 12),
