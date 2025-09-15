@@ -2,11 +2,12 @@ import 'package:egitimciler/app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:egitimciler/app/views/view_signup/view_model/signup_event.dart';
 import 'package:egitimciler/app/views/view_signup/view_model/signup_state.dart';
 import 'package:egitimciler/app/views/view_signup/view_model/signup_view_model.dart';
-
+import '../../app_provider/theme_cubit.dart'; // Dark mode cubit
 
 class SignUpView extends StatelessWidget {
   const SignUpView({super.key});
@@ -15,11 +16,12 @@ class SignUpView extends StatelessWidget {
   Widget build(BuildContext context) {
     // Get localization instance
     final l10n = AppLocalizations.of(context);
+    final isDarkMode = context.watch<ThemeCubit>().state == ThemeMode.dark;
     
     return BlocProvider(
       create: (_) => SignUpViewModel(),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: isDarkMode ? Colors.black : Colors.white,
         body: BlocConsumer<SignUpViewModel, SignUpState>(
           listener: (context, state) {
             if (state.isSuccess) {
@@ -90,7 +92,10 @@ class SignUpView extends StatelessWidget {
                     
                     // Back Button
                     IconButton(
-                      icon: Icon(Icons.arrow_back, color: Colors.grey.shade700),
+                      icon: Icon(
+                        Icons.arrow_back, 
+                        color: isDarkMode ? Colors.white : Colors.grey.shade700,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                     
@@ -124,7 +129,7 @@ class SignUpView extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 32,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: isDarkMode ? Colors.white : Colors.black87,
                       ),
                     ),
                     
@@ -135,7 +140,7 @@ class SignUpView extends StatelessWidget {
                       l10n.joinUs,
                       style: GoogleFonts.poppins(
                         fontSize: 16,
-                        color: Colors.grey.shade600,
+                        color: isDarkMode ? Colors.white70 : Colors.grey.shade600,
                       ),
                     ),
                     
@@ -147,7 +152,7 @@ class SignUpView extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
-                        color: Colors.grey.shade700,
+                        color: isDarkMode ? Colors.white70 : Colors.grey.shade700,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -155,13 +160,15 @@ class SignUpView extends StatelessWidget {
                       onChanged: (value) => bloc.add(SignUpFullNameChanged(value)),
                       decoration: InputDecoration(
                         hintText: l10n.enterFullName,
-                        hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400),
+                        hintStyle: GoogleFonts.poppins(
+                          color: isDarkMode ? Colors.white38 : Colors.grey.shade400,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
                             color: !isNameEmpty 
                               ? (isValidName ? Colors.green : Colors.red)
-                              : Colors.grey.shade300,
+                              : (isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300),
                             width: !isNameEmpty ? 2 : 1,
                           ),
                         ),
@@ -170,7 +177,7 @@ class SignUpView extends StatelessWidget {
                           borderSide: BorderSide(
                             color: !isNameEmpty 
                               ? (isValidName ? Colors.green : Colors.red)
-                              : Colors.grey.shade300,
+                              : (isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300),
                             width: !isNameEmpty ? 2 : 1,
                           ),
                         ),
@@ -184,12 +191,12 @@ class SignUpView extends StatelessWidget {
                           ),
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: isDarkMode ? Colors.grey[900] : Colors.white,
                         prefixIcon: Icon(
                           Icons.person_outline, 
                           color: !isNameEmpty 
                             ? (isValidName ? Colors.green : Colors.red)
-                            : Colors.grey.shade600,
+                            : (isDarkMode ? Colors.white70 : Colors.grey.shade600),
                         ),
                         suffixIcon: !isNameEmpty
                           ? Icon(
@@ -199,7 +206,9 @@ class SignUpView extends StatelessWidget {
                           : null,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
-                      style: GoogleFonts.poppins(),
+                      style: GoogleFonts.poppins(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                     ),
                     
                     // Name validation error
@@ -223,7 +232,7 @@ class SignUpView extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
-                        color: Colors.grey.shade700,
+                        color: isDarkMode ? Colors.white70 : Colors.grey.shade700,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -231,13 +240,15 @@ class SignUpView extends StatelessWidget {
                       onChanged: (value) => bloc.add(SignUpEmailChanged(value)),
                       decoration: InputDecoration(
                         hintText: l10n.enterEmail,
-                        hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400),
+                        hintStyle: GoogleFonts.poppins(
+                          color: isDarkMode ? Colors.white38 : Colors.grey.shade400,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
                             color: !isEmailEmpty 
                               ? (isValidEmail ? Colors.green : Colors.red)
-                              : Colors.grey.shade300,
+                              : (isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300),
                             width: !isEmailEmpty ? 2 : 1,
                           ),
                         ),
@@ -246,7 +257,7 @@ class SignUpView extends StatelessWidget {
                           borderSide: BorderSide(
                             color: !isEmailEmpty 
                               ? (isValidEmail ? Colors.green : Colors.red)
-                              : Colors.grey.shade300,
+                              : (isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300),
                             width: !isEmailEmpty ? 2 : 1,
                           ),
                         ),
@@ -260,12 +271,12 @@ class SignUpView extends StatelessWidget {
                           ),
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: isDarkMode ? Colors.grey[900] : Colors.white,
                         prefixIcon: Icon(
                           Icons.email_outlined, 
                           color: !isEmailEmpty 
                             ? (isValidEmail ? Colors.green : Colors.red)
-                            : Colors.grey.shade600,
+                            : (isDarkMode ? Colors.white70 : Colors.grey.shade600),
                         ),
                         suffixIcon: !isEmailEmpty
                           ? Icon(
@@ -276,7 +287,9 @@ class SignUpView extends StatelessWidget {
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
                       keyboardType: TextInputType.emailAddress,
-                      style: GoogleFonts.poppins(),
+                      style: GoogleFonts.poppins(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                     ),
                     
                     // Email validation error
@@ -300,7 +313,7 @@ class SignUpView extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
-                        color: Colors.grey.shade700,
+                        color: isDarkMode ? Colors.white70 : Colors.grey.shade700,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -309,13 +322,15 @@ class SignUpView extends StatelessWidget {
                       onChanged: (value) => bloc.add(SignUpPasswordChanged(value)),
                       decoration: InputDecoration(
                         hintText: l10n.createPassword,
-                        hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400),
+                        hintStyle: GoogleFonts.poppins(
+                          color: isDarkMode ? Colors.white38 : Colors.grey.shade400,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
                             color: !isPasswordEmpty 
                               ? (isValidPassword ? Colors.green : Colors.red)
-                              : Colors.grey.shade300,
+                              : (isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300),
                             width: !isPasswordEmpty ? 2 : 1,
                           ),
                         ),
@@ -324,7 +339,7 @@ class SignUpView extends StatelessWidget {
                           borderSide: BorderSide(
                             color: !isPasswordEmpty 
                               ? (isValidPassword ? Colors.green : Colors.red)
-                              : Colors.grey.shade300,
+                              : (isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300),
                             width: !isPasswordEmpty ? 2 : 1,
                           ),
                         ),
@@ -338,12 +353,12 @@ class SignUpView extends StatelessWidget {
                           ),
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: isDarkMode ? Colors.grey[900] : Colors.white,
                         prefixIcon: Icon(
                           Icons.lock_outline, 
                           color: !isPasswordEmpty 
                             ? (isValidPassword ? Colors.green : Colors.red)
-                            : Colors.grey.shade600,
+                            : (isDarkMode ? Colors.white70 : Colors.grey.shade600),
                         ),
                         suffixIcon: !isPasswordEmpty
                           ? Icon(
@@ -353,7 +368,9 @@ class SignUpView extends StatelessWidget {
                           : null,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
-                      style: GoogleFonts.poppins(),
+                      style: GoogleFonts.poppins(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                     ),
                     
                     // Password validation error
@@ -377,7 +394,7 @@ class SignUpView extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontWeight: FontWeight.w500,
                         fontSize: 14,
-                        color: Colors.grey.shade700,
+                        color: isDarkMode ? Colors.white70 : Colors.grey.shade700,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -386,13 +403,15 @@ class SignUpView extends StatelessWidget {
                       onChanged: (value) => bloc.add(SignUpConfirmPasswordChanged(value)),
                       decoration: InputDecoration(
                         hintText: l10n.confirmYourPassword,
-                        hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400),
+                        hintStyle: GoogleFonts.poppins(
+                          color: isDarkMode ? Colors.white38 : Colors.grey.shade400,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide(
                             color: !isConfirmPasswordEmpty 
                               ? (passwordsMatch ? Colors.green : Colors.red)
-                              : Colors.grey.shade300,
+                              : (isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300),
                             width: !isConfirmPasswordEmpty ? 2 : 1,
                           ),
                         ),
@@ -401,7 +420,7 @@ class SignUpView extends StatelessWidget {
                           borderSide: BorderSide(
                             color: !isConfirmPasswordEmpty 
                               ? (passwordsMatch ? Colors.green : Colors.red)
-                              : Colors.grey.shade300,
+                              : (isDarkMode ? Colors.grey.shade600 : Colors.grey.shade300),
                             width: !isConfirmPasswordEmpty ? 2 : 1,
                           ),
                         ),
@@ -415,12 +434,12 @@ class SignUpView extends StatelessWidget {
                           ),
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: isDarkMode ? Colors.grey[900] : Colors.white,
                         prefixIcon: Icon(
                           Icons.lock_outline, 
                           color: !isConfirmPasswordEmpty 
                             ? (passwordsMatch ? Colors.green : Colors.red)
-                            : Colors.grey.shade600,
+                            : (isDarkMode ? Colors.white70 : Colors.grey.shade600),
                         ),
                         suffixIcon: !isConfirmPasswordEmpty
                           ? Icon(
@@ -430,7 +449,9 @@ class SignUpView extends StatelessWidget {
                           : null,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
-                      style: GoogleFonts.poppins(),
+                      style: GoogleFonts.poppins(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                     ),
                     
                     // Confirm password validation error
@@ -480,7 +501,7 @@ class SignUpView extends StatelessWidget {
                                 bloc.add(const SignUpSubmitted());
                               },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: isFormValid ? Colors.blue : Colors.grey,
+                          backgroundColor: isFormValid ? Colors.blue : (isDarkMode ? Colors.grey[800] : Colors.grey),
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -513,20 +534,26 @@ class SignUpView extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: Divider(color: Colors.grey.shade300, thickness: 1),
+                          child: Divider(
+                            color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300, 
+                            thickness: 1,
+                          ),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
                             l10n.orSignUpWith,
                             style: GoogleFonts.poppins(
-                              color: Colors.grey.shade600,
+                              color: isDarkMode ? Colors.white70 : Colors.grey.shade600,
                               fontSize: 14,
                             ),
                           ),
                         ),
                         Expanded(
-                          child: Divider(color: Colors.grey.shade300, thickness: 1),
+                          child: Divider(
+                            color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300, 
+                            thickness: 1,
+                          ),
                         ),
                       ],
                     ),
@@ -542,12 +569,14 @@ class SignUpView extends StatelessWidget {
                           width: 56,
                           height: 56,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDarkMode ? Colors.grey[900] : Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
+                            border: Border.all(
+                              color: isDarkMode ? Colors.grey.shade700 : Colors.grey.shade300,
+                            ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.shade200,
+                                color: isDarkMode ? Colors.black54 : Colors.grey.shade200,
                                 blurRadius: 4,
                                 offset: const Offset(0, 2),
                               ),
@@ -577,7 +606,7 @@ class SignUpView extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.shade200,
+                                color: isDarkMode ? Colors.black54 : Colors.grey.shade200,
                                 blurRadius: 4,
                                 offset: const Offset(0, 2),
                               ),
@@ -607,7 +636,7 @@ class SignUpView extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.shade200,
+                                color: isDarkMode ? Colors.black54 : Colors.grey.shade200,
                                 blurRadius: 4,
                                 offset: const Offset(0, 2),
                               ),
@@ -638,7 +667,7 @@ class SignUpView extends StatelessWidget {
                           Text(
                             l10n.alreadyHaveAccount,
                             style: GoogleFonts.poppins(
-                              color: Colors.grey.shade600,
+                              color: isDarkMode ? Colors.white70 : Colors.grey.shade600,
                               fontSize: 14,
                             ),
                           ),
@@ -664,25 +693,46 @@ class SignUpView extends StatelessWidget {
             );
           },
         ),
-        bottomNavigationBar: _buildBottomNavBar(context, 4, (index) {
-          if (index != 4) {
-            switch (index) {
-              case 0:
-                Navigator.pushNamed(context, '/home');
-                break;
-              case 1:
-                Navigator.pushNamed(context, '/search');
-                break;
-              case 2:
-                Navigator.pushNamed(context, '/my_learning');
-                break;
-              case 3:
-                Navigator.pushNamed(context, '/wishlist');
-                break;
-            }
-          }
-        }),
+        bottomNavigationBar: _buildBottomNavBar(context, l10n, isDarkMode),
       ),
+    );
+  }
+
+  Widget _buildBottomNavBar(BuildContext context, AppLocalizations l10n, bool isDarkMode) {
+    final user = Supabase.instance.client.auth.currentUser;
+
+    return BottomNavigationBar(
+      currentIndex: 4,
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
+      type: BottomNavigationBarType.fixed,
+      selectedItemColor: Colors.blue,
+      unselectedItemColor: isDarkMode ? Colors.white70 : Colors.grey.shade600,
+      showUnselectedLabels: true,
+      onTap: (index) {
+        if (index != 4) {
+          switch (index) {
+            case 0:
+              Navigator.pushNamed(context, '/home');
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/search');
+              break;
+            case 2:
+              Navigator.pushNamed(context, '/my_learning');
+              break;
+            case 3:
+              Navigator.pushNamed(context, '/wishlist');
+              break;
+          }
+        }
+      },
+      items: [
+        BottomNavigationBarItem(icon: const Icon(Icons.star), label: l10n.featured),
+        BottomNavigationBarItem(icon: const Icon(Icons.search), label: l10n.search),
+        BottomNavigationBarItem(icon: const Icon(Icons.menu_book), label: l10n.myLearning),
+        BottomNavigationBarItem(icon: const Icon(Icons.favorite), label: l10n.wishlist),
+        BottomNavigationBarItem(icon: const Icon(Icons.account_circle), label: l10n.account),
+      ],
     );
   }
 
@@ -701,28 +751,5 @@ class SignUpView extends StatelessWidget {
     if (!password.contains(RegExp(r'[0-9]'))) return false;
     if (!password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) return false;
     return true;
-  }
-
-  Widget _buildBottomNavBar(BuildContext context, int currentIndex, Function(int) onTap) {
-    final loc = AppLocalizations.of(context);
-
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      backgroundColor: Colors.white,
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.grey.shade600,
-      showUnselectedLabels: true,
-      onTap: (index) {
-        onTap(index);
-      },
-      items: [
-        BottomNavigationBarItem(icon: const Icon(Icons.star), label: loc.featured),
-        BottomNavigationBarItem(icon: const Icon(Icons.search), label: loc.search),
-        BottomNavigationBarItem(icon: const Icon(Icons.menu_book), label: loc.myLearning),
-        BottomNavigationBarItem(icon: const Icon(Icons.favorite), label: loc.wishlist),
-        BottomNavigationBarItem(icon: const Icon(Icons.account_circle), label: loc.account),
-      ],
-    );
   }
 }
