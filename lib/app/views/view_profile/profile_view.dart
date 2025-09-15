@@ -9,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:egitimciler/app/l10n/app_localizations.dart';
+import '../../app_provider/theme_cubit.dart'; // Dark mode cubit
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
@@ -83,6 +84,7 @@ class ProfileView extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentUser = Supabase.instance.client.auth.currentUser;
     final l10n = AppLocalizations.of(context);
+    final isDarkMode = context.watch<ThemeCubit>().state == ThemeMode.dark;
 
     return BlocProvider(
       create: (_) => ProfileViewModel()
@@ -132,6 +134,7 @@ class ProfileView extends StatelessWidget {
         builder: (context, state) {
           final bloc = context.read<ProfileViewModel>();
           final l10n = AppLocalizations.of(context);
+          final isDarkMode = context.watch<ThemeCubit>().state == ThemeMode.dark;
 
           // Controller'ları state'ten başlat
           final TextEditingController lessonTitleController =
@@ -146,21 +149,32 @@ class ProfileView extends StatelessWidget {
           InputDecoration modernInput({String? hint}) {
             return InputDecoration(
               hintText: hint,
-              hintStyle: GoogleFonts.poppins(color: Colors.grey.shade400),
+              hintStyle: GoogleFonts.poppins(
+                color: isDarkMode ? Colors.grey.shade400 : Colors.grey.shade600,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.blue.shade400, width: 1.5),
+                borderSide: BorderSide(
+                  color: isDarkMode ? Colors.blue.shade600 : Colors.blue.shade400, 
+                  width: 1.5
+                ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.blue.shade300, width: 1.5),
+                borderSide: BorderSide(
+                  color: isDarkMode ? Colors.blue.shade500 : Colors.blue.shade300, 
+                  width: 1.5
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.blue.shade500, width: 2),
+                borderSide: BorderSide(
+                  color: isDarkMode ? Colors.blue.shade400 : Colors.blue.shade500, 
+                  width: 2
+                ),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: isDarkMode ? Colors.grey.shade800 : Colors.white,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 14,
@@ -223,18 +237,27 @@ class ProfileView extends StatelessWidget {
           }
 
           return Scaffold(
-            backgroundColor: Colors.white,
+            backgroundColor: isDarkMode ? Colors.black : Colors.white,
             appBar: AppBar(
               title: Text(
                 l10n.profile,
-                style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w600,
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
               ),
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
+              backgroundColor: isDarkMode ? Colors.black : Colors.white,
+              foregroundColor: isDarkMode ? Colors.white : Colors.black87,
               elevation: 0,
+              iconTheme: IconThemeData(
+                color: isDarkMode ? Colors.white : Colors.black,
+              ),
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.logout),
+                  icon: Icon(
+                    Icons.logout,
+                    color: isDarkMode ? Colors.white : Colors.black,
+                  ),
                   tooltip: l10n.logout,
                   onPressed: () => handleLogout(context),
                 ),
@@ -248,7 +271,10 @@ class ProfileView extends StatelessWidget {
                   // Full name
                   Text(
                     l10n.fullName,
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w500,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -257,6 +283,9 @@ class ProfileView extends StatelessWidget {
                         ? state.fullName
                         : currentUser!.userMetadata?['full_name'] ?? '',
                     readOnly: true,
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                     decoration: modernInput(),
                   ),
                   const SizedBox(height: 16),
@@ -264,7 +293,10 @@ class ProfileView extends StatelessWidget {
                   // Email
                   Text(
                     l10n.email,
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w500,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
@@ -273,6 +305,9 @@ class ProfileView extends StatelessWidget {
                         ? state.email
                         : currentUser?.email ?? '',
                     readOnly: true,
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                     decoration: modernInput(),
                   ),
                   const SizedBox(height: 24),
@@ -280,20 +315,38 @@ class ProfileView extends StatelessWidget {
                   // Role
                   Text(
                     l10n.role,
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w500,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: state.role.isNotEmpty ? state.role : null,
                     items: const ["Teacher", "Student"]
                         .map(
-                          (role) => DropdownMenuItem(value: role, child: Text(role == "Teacher" ? l10n.teacher : l10n.student)),
+                          (role) => DropdownMenuItem(
+                            value: role, 
+                            child: Text(
+                              role == "Teacher" ? l10n.teacher : l10n.student,
+                              style: TextStyle(
+                                color: Colors.black, // Dropdown item text color
+                              ),
+                            ),
+                          ),
                         )
                         .toList(),
                     onChanged: (value) =>
                         bloc.add(ProfileFieldChanged(role: value)),
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                     decoration: modernInput(),
-                    dropdownColor: Colors.white,
+                    dropdownColor: isDarkMode ? Colors.grey[800] : Colors.white,
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                   const SizedBox(height: 16),
 
@@ -302,7 +355,10 @@ class ProfileView extends StatelessWidget {
                     Text(
                       l10n.openPrivateLesson,
                       style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w600, fontSize: 16),
+                        fontWeight: FontWeight.w600, 
+                        fontSize: 16,
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     // Lesson Image
@@ -311,15 +367,21 @@ class ProfileView extends StatelessWidget {
                       height: 56,
                       child: ElevatedButton.icon(
                         onPressed: () => pickLessonImage(context),
-                        icon: const Icon(Icons.photo),
+                        icon: Icon(
+                          Icons.photo,
+                          color: isDarkMode ? Colors.black : Colors.white,
+                        ),
                         label: Text(
                           l10n.selectLessonImage,
                           style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w600, fontSize: 16),
+                            fontWeight: FontWeight.w600, 
+                            fontSize: 16,
+                            color: isDarkMode ? Colors.black : Colors.white,
+                          ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          foregroundColor: Colors.white,
+                          backgroundColor: isDarkMode ? Colors.blue.shade200 : Colors.blue,
+                          foregroundColor: isDarkMode ? Colors.black : Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -331,12 +393,18 @@ class ProfileView extends StatelessWidget {
                     // Lesson Title
                     TextFormField(
                       controller: lessonTitleController,
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                       decoration: modernInput(hint: l10n.enterLessonTitle),
                     ),
                     const SizedBox(height: 12),
                     // Lesson Description
                     TextFormField(
                       controller: lessonDescriptionController,
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                       decoration: modernInput(hint: l10n.enterLessonDescription),
                       maxLines: 3,
                     ),
@@ -344,6 +412,9 @@ class ProfileView extends StatelessWidget {
                     // Lesson Price
                     TextFormField(
                       controller: lessonPriceController,
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                       decoration: modernInput(hint: l10n.enterLessonPrice),
                       keyboardType: TextInputType.number,
                     ),
@@ -351,6 +422,9 @@ class ProfileView extends StatelessWidget {
                     // Lesson Duration
                     TextFormField(
                       controller: lessonDurationController,
+                      style: TextStyle(
+                        color: isDarkMode ? Colors.white : Colors.black,
+                      ),
                       decoration: modernInput(hint: l10n.enterLessonDuration),
                       keyboardType: TextInputType.text,
                     ),
@@ -360,25 +434,46 @@ class ProfileView extends StatelessWidget {
                   // Gender
                   Text(
                     l10n.gender,
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w500,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: state.gender.isNotEmpty ? state.gender : null,
                     items: const ["Male", "Female"]
-                        .map((g) => DropdownMenuItem(value: g, child: Text(g == "Male" ? l10n.male : l10n.female)))
+                        .map((g) => DropdownMenuItem(
+                          value: g, 
+                          child: Text(
+                            g == "Male" ? l10n.male : l10n.female,
+                            style: TextStyle(
+                              color: Colors.black, // Dropdown item text color
+                            ),
+                          ),
+                        ))
                         .toList(),
                     onChanged: (value) =>
                         bloc.add(ProfileFieldChanged(gender: value)),
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                     decoration: modernInput(),
-                    dropdownColor: Colors.white,
+                    dropdownColor: isDarkMode ? Colors.grey[800] : Colors.white,
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                   const SizedBox(height: 16),
 
                   // Education Level
                   Text(
                     l10n.educationLevel,
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w500,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
@@ -400,22 +495,35 @@ class ProfileView extends StatelessWidget {
                               edu == "High School" ? l10n.highSchool :
                               edu == "University" ? l10n.university :
                               edu == "Master" ? l10n.master :
-                              l10n.phd
+                              l10n.phd,
+                              style: TextStyle(
+                                color: Colors.black, // Dropdown item text color
+                              ),
                             ),
                           ),
                         )
                         .toList(),
                     onChanged: (value) =>
                         bloc.add(ProfileFieldChanged(educationLevel: value)),
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                     decoration: modernInput(),
-                    dropdownColor: Colors.white,
+                    dropdownColor: isDarkMode ? Colors.grey[800] : Colors.white,
+                    icon: Icon(
+                      Icons.arrow_drop_down,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                   const SizedBox(height: 16),
 
                   // School (Autocomplete)
                   Text(
                     l10n.school,
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w500),
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w500,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Autocomplete<String>(
@@ -432,6 +540,38 @@ class ProfileView extends StatelessWidget {
                     },
                     onSelected: (value) =>
                         bloc.add(ProfileFieldChanged(school: value)),
+                    optionsViewBuilder: (context, onSelected, options) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          color: isDarkMode ? Colors.grey[800] : Colors.white,
+                          elevation: 4.0,
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.8,
+                            constraints: const BoxConstraints(maxHeight: 200),
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              itemCount: options.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final String option = options.elementAt(index);
+                                return InkWell(
+                                  onTap: () => onSelected(option),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Text(
+                                      option,
+                                      style: TextStyle(
+                                        color: isDarkMode ? Colors.white : Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                     fieldViewBuilder:
                         (context, controller, focusNode, onEditingComplete) {
                       controller.text = state.school;
@@ -441,6 +581,9 @@ class ProfileView extends StatelessWidget {
                         onEditingComplete: onEditingComplete,
                         onChanged: (val) =>
                             bloc.add(ProfileFieldChanged(school: val)),
+                        style: TextStyle(
+                          color: isDarkMode ? Colors.white : Colors.black,
+                        ),
                         decoration: modernInput(hint: l10n.enterYourSchool),
                       );
                     },
@@ -456,8 +599,8 @@ class ProfileView extends StatelessWidget {
                           ? null
                           : handleSaveProfile,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
+                        backgroundColor: isDarkMode ? Colors.blue.shade200 : Colors.blue,
+                        foregroundColor: isDarkMode ? Colors.black : Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -465,11 +608,11 @@ class ProfileView extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(horizontal: 24),
                       ),
                       child: state.isSaving
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 24,
                               height: 24,
                               child: CircularProgressIndicator(
-                                color: Colors.white,
+                                color: isDarkMode ? Colors.black : Colors.white,
                                 strokeWidth: 3,
                               ),
                             )
@@ -485,7 +628,7 @@ class ProfileView extends StatelessWidget {
                 ],
               ),
             ),
-            bottomNavigationBar: buildBottomNavBar(4, (index) {
+            bottomNavigationBar: _buildBottomNavBar(l10n, isDarkMode, 4, (index) {
               switch (index) {
                 case 0:
                   Navigator.pushReplacement(
@@ -509,35 +652,27 @@ class ProfileView extends StatelessWidget {
                   // Already in Account/Profile
                   break;
               }
-            }, l10n),
+            }),
           );
         },
       ),
     );
   }
 
-  BottomNavigationBar buildBottomNavBar(int currentIndex, Function(int) onTap, AppLocalizations l10n) {
+  BottomNavigationBar _buildBottomNavBar(AppLocalizations local, bool isDarkMode, int currentIndex, Function(int) onTap) {
     return BottomNavigationBar(
-      backgroundColor: Colors.white,
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
       selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.black54,
+      unselectedItemColor: isDarkMode ? Colors.white70 : Colors.black54,
       currentIndex: currentIndex,
       type: BottomNavigationBarType.fixed,
-      selectedLabelStyle: GoogleFonts.poppins(),
-      unselectedLabelStyle: GoogleFonts.poppins(),
       onTap: (index) => onTap(index),
       items: [
-        BottomNavigationBarItem(icon: const Icon(Icons.star), label: l10n.featured),
-        BottomNavigationBarItem(icon: const Icon(Icons.search), label: l10n.search),
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.menu_book),
-          label: l10n.myLearning,
-        ),
-        BottomNavigationBarItem(icon: const Icon(Icons.favorite), label: l10n.wishlist),
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.account_circle),
-          label: l10n.account,
-        ),
+        BottomNavigationBarItem(icon: const Icon(Icons.star), label: local.featured),
+        BottomNavigationBarItem(icon: const Icon(Icons.search), label: local.search),
+        BottomNavigationBarItem(icon: const Icon(Icons.menu_book), label: local.myLearning),
+        BottomNavigationBarItem(icon: const Icon(Icons.favorite), label: local.wishlist),
+        BottomNavigationBarItem(icon: const Icon(Icons.account_circle), label: local.account),
       ],
     );
   }
