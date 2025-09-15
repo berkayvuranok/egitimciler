@@ -7,7 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:egitimciler/app/l10n/app_localizations.dart';
-
+import 'app/app_provider/theme_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +28,8 @@ Future<void> main() async {
         BlocProvider(create: (_) => OnboardingViewModel()),
         // Root seviyede LocaleCubit provider
         BlocProvider(create: (_) => LocaleCubit()),
+        // Root seviyede ThemeCubit provider
+        BlocProvider(create: (_) => ThemeCubit()),
       ],
       child: const MyApp(),
     ),
@@ -39,26 +41,37 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<LocaleCubit, Locale>(
-      builder: (context, locale) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Egitimciler',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-            useMaterial3: true,
-          ),
-          // Locale ve localization desteği
-          locale: locale,
-          supportedLocales: const [Locale('en'), Locale('tr')],
-          localizationsDelegates: const [
-            AppLocalizationsDelegate(),
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          onGenerateRoute: AppRouter.generateRoute,
-          initialRoute: '/',
+    // MaterialApp hem locale hem themeMode’a bağlı
+    return BlocBuilder<ThemeCubit, ThemeMode>(
+      builder: (context, themeMode) {
+        return BlocBuilder<LocaleCubit, Locale>(
+          builder: (context, locale) {
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'Egitimciler',
+              theme: ThemeData(
+                brightness: Brightness.light,
+                primarySwatch: Colors.blue,
+                useMaterial3: true,
+              ),
+              darkTheme: ThemeData(
+                brightness: Brightness.dark,
+                primarySwatch: Colors.blue,
+                useMaterial3: true,
+              ),
+              themeMode: themeMode, // ✅ ThemeCubit state’i burada kullanılıyor
+              locale: locale,
+              supportedLocales: const [Locale('en'), Locale('tr')],
+              localizationsDelegates: const [
+                AppLocalizationsDelegate(),
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              onGenerateRoute: AppRouter.generateRoute,
+              initialRoute: '/',
+            );
+          },
         );
       },
     );
