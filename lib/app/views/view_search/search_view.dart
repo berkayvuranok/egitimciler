@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:egitimciler/app/l10n/app_localizations.dart';
+import '../../app_provider/theme_cubit.dart'; // Dark mode cubit
 
 class SearchView extends StatelessWidget {
   const SearchView({super.key});
@@ -39,7 +40,6 @@ class _SearchViewContentState extends State<_SearchViewContent> {
         Navigator.pushNamed(context, '/home');
         break;
       case 1:
-        // Zaten Search ekranındayız
         break;
       case 2:
         Navigator.pushNamed(context, '/my_learning');
@@ -69,127 +69,153 @@ class _SearchViewContentState extends State<_SearchViewContent> {
   Widget build(BuildContext context) {
     final local = AppLocalizations.of(context);
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const SizedBox(height: 32),
-            TextField(
-              controller: searchController,
-              decoration: InputDecoration(
-                hintText: local.searchHint,
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onChanged: (value) {
-                context.read<SearchViewModel>().add(SearchTextChanged(value));
-              },
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: BlocBuilder<SearchViewModel, SearchState>(
-                builder: (context, state) {
-                  if (state is SearchLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (state is SearchError) {
-                    return Center(child: Text(state.message));
-                  }
-                  if (state is SearchLoaded) {
-                    final results = state.results;
-                    if (results.isEmpty) {
-                      return Center(child: Text(local.noResultsFound));
-                    }
-                    return ListView.builder(
-                      itemCount: results.length,
-                      itemBuilder: (context, index) {
-                        final product = results[index];
-                        final imageUrl = _getImageUrl(product['image_url'], index);
+    return BlocBuilder<ThemeCubit, ThemeMode>(
+      builder: (context, themeMode) {
+        final isDarkMode = themeMode == ThemeMode.dark;
 
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ProductDetailView(product: product),
+        return Scaffold(
+          backgroundColor: isDarkMode ? Colors.black : Colors.white,
+          body: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                const SizedBox(height: 32),
+                TextField(
+                  controller: searchController,
+                  style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+                  decoration: InputDecoration(
+                    hintText: local.searchHint,
+                    hintStyle: TextStyle(color: isDarkMode ? Colors.white54 : Colors.black45),
+                    prefixIcon: Icon(Icons.search, color: isDarkMode ? Colors.white : Colors.black54),
+                    filled: true,
+                    fillColor: isDarkMode ? Colors.grey[900] : Colors.grey[200],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  onChanged: (value) {
+                    context.read<SearchViewModel>().add(SearchTextChanged(value));
+                  },
+                ),
+                const SizedBox(height: 16),
+                Expanded(
+                  child: BlocBuilder<SearchViewModel, SearchState>(
+                    builder: (context, state) {
+                      if (state is SearchLoading) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      if (state is SearchError) {
+                        return Center(
+                          child: Text(
+                            state.message,
+                            style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+                          ),
+                        );
+                      }
+                      if (state is SearchLoaded) {
+                        final results = state.results;
+                        if (results.isEmpty) {
+                          return Center(
+                            child: Text(
+                              local.noResultsFound,
+                              style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+                            ),
+                          );
+                        }
+                        return ListView.builder(
+                          itemCount: results.length,
+                          itemBuilder: (context, index) {
+                            final product = results[index];
+                            final imageUrl = _getImageUrl(product['image_url'], index);
+
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ProductDetailView(product: product),
+                                  ),
+                                );
+                              },
+                              child: Card(
+                                color: isDarkMode ? Colors.grey[900] : Colors.white,
+                                margin: const EdgeInsets.only(bottom: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: const BorderRadius.only(
+                                        topLeft: Radius.circular(12),
+                                        bottomLeft: Radius.circular(12),
+                                      ),
+                                      child: Image.network(
+                                        imageUrl,
+                                        width: 100,
+                                        height: 100,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              product['name'] ?? '',
+                                              style: GoogleFonts.poppins(
+                                                fontWeight: FontWeight.bold,
+                                                color: isDarkMode ? Colors.white : Colors.black,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              local.instructorLabel(product['instructor'] ?? ''),
+                                              style: GoogleFonts.poppins(
+                                                fontSize: 12,
+                                                color: isDarkMode ? Colors.white70 : Colors.black54,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
                             );
                           },
-                          child: Card(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: const BorderRadius.only(
-                                    topLeft: Radius.circular(12),
-                                    bottomLeft: Radius.circular(12),
-                                  ),
-                                  child: Image.network(
-                                    imageUrl,
-                                    width: 100,
-                                    height: 100,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          product['name'] ?? '',
-                                          style: GoogleFonts.poppins(
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          local.instructorLabel(product['instructor'] ?? ''),
-                                          style: GoogleFonts.poppins(fontSize: 12),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
                         );
-                      },
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.black54,
-        currentIndex: currentIndex,
-        type: BottomNavigationBarType.fixed,
-        selectedLabelStyle: GoogleFonts.poppins(),
-        unselectedLabelStyle: GoogleFonts.poppins(),
-        onTap: _handleBottomNavTap,
-        items: [
-          BottomNavigationBarItem(icon: const Icon(Icons.star), label: local.featured),
-          BottomNavigationBarItem(icon: const Icon(Icons.search), label: local.search),
-          BottomNavigationBarItem(icon: const Icon(Icons.menu_book), label: local.myLearning),
-          BottomNavigationBarItem(icon: const Icon(Icons.favorite), label: local.wishlist),
-          BottomNavigationBarItem(icon: const Icon(Icons.account_circle), label: local.account),
-        ],
-      ),
+          ),
+          bottomNavigationBar: BottomNavigationBar(
+            backgroundColor: isDarkMode ? Colors.black : Colors.white,
+            selectedItemColor: Colors.blue,
+            unselectedItemColor: isDarkMode ? Colors.white70 : Colors.black54,
+            currentIndex: currentIndex,
+            type: BottomNavigationBarType.fixed,
+            selectedLabelStyle: GoogleFonts.poppins(),
+            unselectedLabelStyle: GoogleFonts.poppins(),
+            onTap: _handleBottomNavTap,
+            items: [
+              BottomNavigationBarItem(icon: const Icon(Icons.star), label: local.featured),
+              BottomNavigationBarItem(icon: const Icon(Icons.search), label: local.search),
+              BottomNavigationBarItem(icon: const Icon(Icons.menu_book), label: local.myLearning),
+              BottomNavigationBarItem(icon: const Icon(Icons.favorite), label: local.wishlist),
+              BottomNavigationBarItem(icon: const Icon(Icons.account_circle), label: local.account),
+            ],
+          ),
+        );
+      },
     );
   }
 }
